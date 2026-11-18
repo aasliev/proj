@@ -1,0 +1,111 @@
+.rb{--rb-ok:#2f7d4f;--rb-warn:#a8691b;--rb-bad:#b3412d;font-size:14px}
+.iso[data-theme="dark"] .rb{--rb-ok:#6be0a0;--rb-warn:#e6b45c;--rb-bad:#ff7b6b}
+.rb h1{font:600 22px/1.2 ui-sans-serif,system-ui,sans-serif;color:var(--anatomy-strong);margin:2px 0 0}
+.rb h2{font:600 19px/1.25 ui-sans-serif,system-ui,sans-serif;color:var(--anatomy-strong);margin:4px 0 8px}
+.rb-kicker{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted);margin:0}
+.rb-top{display:grid;grid-template-columns:1fr auto;gap:10px 18px;align-items:end;margin-bottom:14px}
+.rb-progress{grid-column:1/-1}
+.rb-bar{height:4px;border-radius:2px;background:var(--anatomy-faint);position:relative;overflow:hidden}
+.rb-bar::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p,0%);background:var(--anatomy-strong);transition:width .6s var(--anatomy-ease)}
+.rb-readout{font:12px/1.5 var(--anatomy-mono);color:var(--anatomy-muted);margin:6px 0 0}
+.rb-modes{display:inline-flex;border:1px solid var(--anatomy-lo);border-radius:7px;overflow:hidden}
+.rb-mode{background:none;border:0;padding:7px 14px;font:12px/1 var(--anatomy-mono);color:var(--anatomy-muted);cursor:pointer}
+.rb-mode[data-on]{background:var(--anatomy-strong);color:var(--anatomy-page)}
+.rb-main{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px;align-items:start}
+.rb-plate{padding:10px;position:sticky;top:12px}
+.rb-figure svg{display:block;width:100%;height:auto;max-height:72vh}
+.rb-figure [data-part]{transform-box:view-box}
+.rb-holed .iso-fill,.rb-holed .iso-top{fill-rule:evenodd}
+.rb-bore{fill:var(--anatomy-shade-0)}
+.rb-ghost .iso-fill,.rb-ghost .iso-top,.rb-ghost .iso-shade{fill-opacity:.55}
+.rb-card{min-width:0}
+.rb-say{color:var(--anatomy-text);margin:0 0 6px;line-height:1.55}
+.rb-ref{font:11px/1.4 var(--anatomy-mono);color:var(--anatomy-muted);margin:0 0 12px}
+.rb-task{border-top:1px solid var(--anatomy-faint);padding:12px 0}
+.rb-task[data-done]{opacity:.82}
+.rb-q>p{margin:0 0 8px;color:var(--anatomy-strong);line-height:1.5}
+.rb-q em,.rb-checks em{font-style:normal;font:11px var(--anatomy-mono);color:var(--anatomy-muted);margin-left:6px}
+.rb-help{font-size:13px;color:var(--anatomy-muted);margin:4px 0 8px;line-height:1.45}
+.rb-options{display:flex;flex-wrap:wrap;gap:6px}
+.rb-col{flex-direction:column;align-items:stretch}
+.rb-opt,.rb-btn{font:inherit;font-size:13px;text-align:left;color:var(--anatomy-strong);background:var(--anatomy-card);border:1px solid var(--anatomy-lo);border-radius:7px;padding:8px 11px;cursor:pointer;transition:border-color .2s var(--anatomy-ease),background .2s var(--anatomy-ease)}
+.rb-opt:hover:not(:disabled),.rb-btn:hover:not(:disabled){border-color:var(--anatomy-mid)}
+.rb-opt:disabled,.rb-btn:disabled{cursor:default;opacity:.55}
+.rb-opt[data-on]{border-color:var(--anatomy-strong);box-shadow:inset 0 0 0 1px var(--anatomy-strong)}
+.rb-opt[data-state="right"]{border-color:var(--rb-ok);box-shadow:inset 0 0 0 1px var(--rb-ok);opacity:1}
+.rb-opt[data-state="wrong"]{border-color:var(--rb-bad);box-shadow:inset 0 0 0 1px var(--rb-bad)}
+.rb-why{font-size:13px;line-height:1.5;margin:8px 0 0;padding-left:10px;border-left:2px solid var(--anatomy-lo)}
+.rb-why[data-state="right"]{border-color:var(--rb-ok)}
+.rb-why[data-state="wrong"]{border-color:var(--rb-bad)}
+.rb-answer{font-size:13px;line-height:1.5;color:var(--anatomy-text)}
+.rb-variant{border:0;padding:0;margin:0 0 12px}
+.rb-variant legend{font-weight:600;color:var(--anatomy-strong);padding:0}
+.rb-checks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rb-checks label,.rb-stages label{display:flex;gap:9px;align-items:flex-start;cursor:pointer;line-height:1.45}
+.rb-checks input,.rb-stages input[type=checkbox]{margin-top:3px;accent-color:var(--anatomy-strong)}
+.rb-stages{margin:0;padding-left:20px;display:grid;gap:8px}
+.rb-stages li{line-height:1.45}
+.rb-stages li>span:first-child{display:block}
+.rb-stages b{font:600 14px var(--anatomy-mono);color:var(--anatomy-strong);margin-right:10px}
+.rb-stages li[data-on] b{color:var(--rb-ok)}
+.rb-entry{display:inline-flex;gap:6px;align-items:center;margin-top:4px}
+.rb-entry input,.rb-table input{width:90px;font:13px var(--anatomy-mono);padding:6px 8px;border:1px solid var(--anatomy-lo);border-radius:6px;background:var(--anatomy-card);color:var(--anatomy-strong)}
+.rb-entry em{font:12px var(--anatomy-mono);color:var(--anatomy-muted)}
+.rb-hint{display:block;font-size:12px;color:var(--rb-bad);min-height:1em}
+.rb-tick{display:inline-flex !important;font-size:12px;color:var(--anatomy-muted)}
+.rb-table-wrap{max-height:280px;overflow:auto}
+.rb-table{border-collapse:collapse;width:100%;font-size:13px}
+.rb-table th{text-align:left;font-weight:400;color:var(--anatomy-text);padding:3px 8px 3px 0;white-space:nowrap}
+.rb-table td{padding:3px 6px 3px 0}
+.rb-grade{font:11px var(--anatomy-mono)}
+.rb-grade[data-grade="ok"]{color:var(--rb-ok)}
+.rb-grade[data-grade="worn"]{color:var(--rb-warn)}
+.rb-grade[data-grade="low"],.rb-grade[data-grade="bad"]{color:var(--rb-bad)}
+.rb-row{display:flex;gap:6px;margin-top:8px}
+.rb-note{font-size:13px;color:var(--anatomy-muted);margin:0}
+.rb-diagram{width:100%;max-width:300px;display:block;margin:4px 0}
+.rb-cap{fill:var(--anatomy-face);stroke:var(--anatomy-mid);stroke-width:1}
+.rb-hub{fill:none;stroke:var(--anatomy-lo);stroke-width:1}
+.rb-side{fill:none;stroke:var(--anatomy-mid);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.rb-side-t,.rb-end{font:10px var(--anatomy-mono);fill:var(--anatomy-muted)}
+.rb-end{text-anchor:middle;font-size:8.5px}
+.rb-bolt{cursor:pointer;outline:none}
+.rb-bolt circle{fill:var(--anatomy-card);stroke:var(--anatomy-strong);stroke-width:1.3;transition:fill .2s var(--anatomy-ease)}
+.rb-bolt:hover circle,.rb-bolt:focus-visible circle{fill:var(--anatomy-faint)}
+.rb-bolt[data-on] circle{fill:var(--anatomy-strong)}
+.rb-bolt text{font:600 11px var(--anatomy-mono);fill:var(--anatomy-page);text-anchor:middle;pointer-events:none}
+.rb-shake{animation:rb-shake .35s}
+.rb-shake circle{stroke:var(--rb-bad)}
+@keyframes rb-shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.rb-nav{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--anatomy-faint)}
+.rb-state{flex:1;text-align:center;font:12px var(--anatomy-mono);color:var(--anatomy-muted)}
+.rb-pop{color:var(--rb-ok)}
+.rb-primary{background:var(--anatomy-strong);color:var(--anatomy-page);border-color:var(--anatomy-strong)}
+.rb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px 22px;margin:22px 0 8px}
+.rb-group h3{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted);margin:0 0 4px}
+.rb-group ol{list-style:none;margin:0;padding:0}
+.rb-step{display:flex;gap:8px;align-items:baseline;width:100%;text-align:left;background:none;border:0;padding:3px 0;font:inherit;font-size:13px;color:var(--anatomy-muted);cursor:pointer}
+.rb-step:hover,.rb-step[aria-current]{color:var(--anatomy-strong)}
+.rb-step[aria-current]{font-weight:600}
+.rb-dot{width:7px;height:7px;border-radius:50%;border:1px solid var(--anatomy-mid);flex:none;transform:translateY(-1px)}
+.rb-step[data-done] .rb-dot{background:var(--rb-ok);border-color:var(--rb-ok)}
+.rb-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.rb-legal{font-size:12px;color:var(--anatomy-muted);line-height:1.5;max-width:760px}
+.rb-print{display:none}
+.rb button:focus-visible,.rb input:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:2px}
+@media (max-width:820px){
+  .rb-main{grid-template-columns:1fr}
+  .rb-plate{position:static}
+  .rb-figure svg{max-height:50vh}
+  .rb-top{grid-template-columns:1fr}
+}
+@media print{
+  body{background:#fff}
+  .rb>*:not(.rb-print){display:none !important}
+  .rb-print{display:block;color:#000;font-size:11px}
+  .rb-print h1{font-size:16px}
+  .rb-print h2{font-size:12px;margin:10px 0 2px;color:#000}
+  .rb-print small{font-weight:400;color:#555}
+  .rb-print ul{margin:0;padding-left:0;list-style:none}
+  .rb-print section{break-inside:avoid}
+}
