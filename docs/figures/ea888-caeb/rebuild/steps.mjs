@@ -6,6 +6,10 @@
 // against the book. Text is paraphrased, not copied. Where the manual leaves a choice
 // to the parts catalog or to the engine's version, the step asks the user instead of
 // guessing.
+//
+// Stage 2 (timing drive, covers, oil pans, coolant pump) lives in steps-stage2.mjs and is
+// spliced in here in assembly order: the rear crank seal goes on after the upper oil pan.
+import { VARIANTS2, SPEC2, GROUPS2, BEFORE_REAR, AFTER_REAR, DIAGRAMS2 } from "./steps-stage2.mjs";
 
 export const VARIANTS = {
   rodBolt: {
@@ -54,7 +58,9 @@ export const GROUPS = [
   { id: "balance", name: "Block and balance shafts" },
   { id: "crank", name: "Crankshaft" },
   { id: "pistons", name: "Pistons and rods" },
+  ...GROUPS2.before,
   { id: "rear", name: "Rear crank seal" },
+  ...GROUPS2.after,
 ];
 
 export const STEPS = [
@@ -316,7 +322,7 @@ export const STEPS = [
     focus: ["seal"],
     install: ["seal"],
     ref: "13 · p. 49–50",
-    say: "The seal sits where the intake balance shaft leaves the block at the front; the coolant pump's toothed-belt drive wheel goes on later, in stage 2.",
+    say: "The seal sits where the balance shaft carries the coolant pump's toothed-belt drive wheel; the wheel goes on later, with the coolant pump. (The manual calls this seal intake side in one place and exhaust side in another; it is the one behind that drive wheel.)",
     tasks: [
       {
         type: "choice",
@@ -657,7 +663,8 @@ export const STEPS = [
     say: "Measure the axial (side) clearance of each rod on its crank pin with feeler gauges.",
     tasks: [{ type: "measure", spec: "rodAxial", label: "Rod axial clearance", items: CYL }],
   },
-  // ---------------------------------------------------------------- rear crank seal
+  ...BEFORE_REAR,
+  // ---------------------------------------------------------------- rear crank seal (after the upper oil pan)
   {
     id: "flange-prep",
     group: "rear",
@@ -667,7 +674,7 @@ export const STEPS = [
     ref: "13 · p. 33",
     say: "A new flange with its seal, sealant on the flange face. Prepare everything first: once the bead is on you have five minutes.",
     tasks: [
-      { type: "check", items: ["Protective eyewear on", "Clean cloth over the open crankcase so no sealant residue falls in", "Old sealant removed from the block, for example with a rotating plastic brush", "Sealing faces and crank journal free of oil and grease", "Sealant within its expiry date; nozzle cut at the front mark (about 2 mm)"] },
+      { type: "check", items: ["Protective eyewear on", "Clean cloth over the open oil pan so no sealant residue falls in", "Old sealant removed from the block, for example with a rotating plastic brush", "Sealing faces and crank journal free of oil and grease", "Sealant within its expiry date; nozzle cut at the front mark (about 2 mm)"] },
       {
         type: "choice",
         q: "Do you oil the new seal's lip before fitting it?",
@@ -732,7 +739,10 @@ export const STEPS = [
       },
     ],
   },
+  ...AFTER_REAR,
 ];
+Object.assign(VARIANTS, VARIANTS2);
+Object.assign(SPEC, SPEC2);
 
 // Ring gap and groove specs depend on the oil ring version.
 export function specFor(id, variants) {
@@ -781,3 +791,4 @@ export const DIAGRAMS = {
     ],
   },
 };
+Object.assign(DIAGRAMS, DIAGRAMS2);

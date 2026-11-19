@@ -1,4 +1,4 @@
-// EA888 Gen 2 (CAEB) rebuild trainer, stage 1: bottom-end assembly.
+// EA888 Gen 2 (CAEB) rebuild trainer: stage 1 (bottom end) and stage 2 (timing drive, covers, pans, coolant pump).
 // Build: node docs/figures/ea888-caeb/rebuild/build.mjs [--dark]
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -24,7 +24,7 @@ const GAME = readFileSync(join(HERE, "game.js"), "utf8").replace("__DATA__", JSO
 
 const body = `<div class="rb iso-figure">
   <header class="rb-top">
-    <div class="rb-title"><p class="rb-kicker">EA888 Gen 2 · CAEB · rebuild trainer</p><h1>Stage 1: bottom end</h1></div>
+    <div class="rb-title"><p class="rb-kicker">EA888 Gen 2 · CAEB · rebuild trainer</p><h1>Bottom end, timing drive and oil pans</h1></div>
     <div class="rb-modes" role="group" aria-label="Mode"><button type="button" class="rb-mode" data-mode="game">Practice</button><button type="button" class="rb-mode" data-mode="garage">Garage</button></div>
     <div class="rb-progress"><div class="rb-bar" data-bar aria-hidden="true"></div><p class="rb-readout" data-readout aria-live="polite"></p></div>
   </header>

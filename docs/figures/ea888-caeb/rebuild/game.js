@@ -43,7 +43,7 @@ function specFor(id) {
   return { ...table, unit: "mm", ref: id.startsWith("gap") ? "13 · p. 57" : "13 · p. 58" };
 }
 const fmt = (value) => (Math.abs(value) < 1 ? value.toFixed(3).replace(/0$/, "") : value.toFixed(2));
-const specText = (spec) => (spec.nominal ? `${fmt(spec.nominal)} mm ± ${fmt(spec.dev)} mm` : `new ${fmt(spec.min)}–${fmt(spec.max)} mm · wear limit ${fmt(spec.limit)} mm`);
+const specText = (spec) => (spec.nominal ? `${fmt(spec.nominal)} mm ± ${fmt(spec.dev)} mm` : spec.limit === undefined ? `${fmt(spec.min)}–${fmt(spec.max)} mm` : `new ${fmt(spec.min)}–${fmt(spec.max)} mm · wear limit ${fmt(spec.limit)} mm`);
 function grade(spec, value) {
   if (!Number.isFinite(value)) return null;
   if (spec.nominal) return Math.abs(value - spec.nominal) <= spec.dev + 1e-9 ? "ok" : "bad";
@@ -197,7 +197,14 @@ function orderView(step, task) {
     });
     shapes += `<text class="rb-end" x="150" y="${top - 8}">${esc("bearing cap 1 / 5: check orientation in your manual, p. 38")}</text>`;
   } else {
-    shapes += `<path class="rb-cap" d="M60 40 Q150 -6 240 40 L262 210 Q150 300 38 210 Z"/><circle class="rb-hub" cx="150" cy="150" r="52"/>`;
+    // Outlines roughly as in the manual's figures: rear flange, timing covers, bearing bracket, oil pans.
+    const outline = {
+      flange: `<path class="rb-cap" d="M60 40 Q150 -6 240 40 L262 210 Q150 300 38 210 Z"/><circle class="rb-hub" cx="150" cy="150" r="52"/>`,
+      cover: `<path class="rb-cap" d="M70 26 Q150 4 230 26 L262 120 L244 230 Q150 296 56 230 L38 120 Z"/><circle class="rb-hub" cx="150" cy="190" r="30"/>`,
+      bracket: `<path class="rb-cap" d="M40 92 L150 34 L262 124 L196 260 L72 256 Z"/><circle class="rb-hub" cx="186" cy="132" r="34"/>`,
+      pan: `<rect class="rb-cap" x="28" y="30" width="244" height="232" rx="14"/>`,
+    }[d.shape || "flange"];
+    shapes += outline;
     d.bolts.forEach((b, i) => { marks += boltMark(k, b, i, 30 + b.x * 2.4, 22 + b.y * 2.4, got); });
   }
   const status = got.length === total ? `<p class="rb-why" data-state="right">Right: ${esc(d.ref)}. ${task.diagram === "mains" ? "Middle cap first, then outward." : ""}</p>` : `<p class="rb-help">${garage() ? "Order shown as in the manual." : `Click bolt ${next} of ${total}.`}</p>`;
@@ -332,6 +339,7 @@ root.addEventListener("click", (event) => {
       const roll = Math.random();
       let v;
       if (spec.nominal) v = spec.nominal + (roll < 0.9 ? (Math.random() * 2 - 1) * spec.dev * 0.7 : spec.dev * (1.2 + Math.random() * 0.5));
+      else if (spec.limit === undefined) v = roll < 0.85 ? spec.min + Math.random() * (spec.max - spec.min) : spec.max + (spec.max - spec.min) * (0.5 + Math.random());
       else v = roll < 0.8 ? spec.min + Math.random() * (spec.max - spec.min) : roll < 0.95 ? spec.max + Math.random() * (spec.limit - spec.max) : spec.limit * (1.05 + Math.random() * 0.2);
       S.values[`${k}.${i}`] = Number(v.toFixed(3));
     });
@@ -415,7 +423,7 @@ function exportLog() {
 const sheet = root.querySelector("[data-print]");
 function printSheet() {
   const all = steps();
-  sheet.innerHTML = `<h1>EA888 Gen 2 (CAEB) · bottom-end assembly checklist</h1><p>Versions: rod bolts ${esc(S.variants.rodBolt || "?")}, oil ring ${esc(S.variants.oilRing ? `${S.variants.oilRing}-piece` : "?")}, flange ${esc(S.variants.flange || "?")}. Values from the Audi repair manual for EA888 Gen II (06.2019); check each against your copy.</p>` + all.map((step, i) => {
+  sheet.innerHTML = `<h1>EA888 Gen 2 (CAEB) · assembly checklist (stages 1–2)</h1><p>Versions: rod bolts ${esc(S.variants.rodBolt || "?")}, oil ring ${esc(S.variants.oilRing ? `${S.variants.oilRing}-piece` : "?")}, flange ${esc(S.variants.flange || "?")}. Values from the Audi repair manual for EA888 Gen II (06.2019); check each against your copy.</p>` + all.map((step, i) => {
     const lines = tasksOf(step).map((task) => {
       if (task.type === "check") return task.items.map((x) => `<li>☐ ${esc(x)}</li>`).join("");
       if (task.type === "choice") { const r = task.options.find((o) => o.ok); return `<li>☐ ${esc(task.q)} <b>${esc(r.text)}</b></li>`; }

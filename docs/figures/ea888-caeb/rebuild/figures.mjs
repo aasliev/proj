@@ -370,6 +370,116 @@ function overview() {
   return f.svg();
 }
 
+// ---------------------------------------------------------------- stage 2: front of the engine
+// Seen almost head-on from the belt pulley end (+x): the three-stage crank sprocket, the
+// balance shaft chain, the camshaft chain and the oil pump chain, then the covers and damper.
+const loopOf = (x, circles, pad = 2.5) => hull(circles.flatMap(([y, z, r]) => Array.from({ length: 48 }, (_, i) => [y + (r + pad) * Math.cos((i / 48) * 2 * Math.PI), z + (r + pad) * Math.sin((i / 48) * 2 * Math.PI)]))).map(([y, z]) => [x, y, z]);
+const chainSvg = (P, loop, r = 2.6) => tubePieces(loop, r, P, { closed: true, maxLength: 80, spacing: 1, rings: { pitch: 6, tone: "lo" } }).map((piece) => tubeSvg(piece, { tone: "mid" })).join("");
+// The straight run between two sprockets on one side of a loop, trimmed away from both.
+function runOf(loop, test) {
+  let best = null;
+  loop.forEach((p, i) => {
+    const q = loop[(i + 1) % loop.length];
+    const len = Math.hypot(q[1] - p[1], q[2] - p[2]);
+    if (test((p[1] + q[1]) / 2, (p[2] + q[2]) / 2) && (!best || len > best.len)) best = { len, a: [p[1], p[2]], b: [q[1], q[2]] };
+  });
+  const t = (u) => [best.a[0] + (best.b[0] - best.a[0]) * u, best.a[1] + (best.b[1] - best.a[1]) * u];
+  return [t(0.15), t(0.85)];
+}
+function railPoly([a, b], side, thick = 7) {
+  const d = [b[0] - a[0], b[1] - a[1]];
+  const len = Math.hypot(...d);
+  const n = [(-d[1] / len) * side, (d[0] / len) * side];
+  return [a, b, [b[0] + n[0] * thick, b[1] + n[1] * thick], [a[0] + n[0] * thick, a[1] + n[1] * thick]].map(([y, z]) => [y + n[0] * 3, z + n[1] * 3]);
+}
+const CAM = { in: [-54, 336], ex: [54, 336], r: 44 };
+const BAL = { idler: [-80, 34, 26], shaft: [82, 48, 22] };
+const PUMP = [0, -150, 26];
+function front() {
+  const f = figure({ id: "front", label: "The front of the engine seen from the belt pulley end: the three-stage crank sprocket, the balance shaft chain, the camshaft timing chain with its rails and tensioner, the oil pump chain, the bearing bracket and control valve, the lower and upper timing chain covers and the vibration damper.", fit: [[150, -120, -190], [150, 120, -190], [150, -120, 400], [150, 120, 400], [480, -120, -190], [480, 120, 400]], azimuth: 18, elevation: 16, width: 560, height: 520 });
+  const { P } = f;
+  const X0 = (x, y, z) => X([x, y, z]);
+  const teeth = (F, s, r, n) => D(G.dotsOf(F, s, r - 1.6, n, P, { all: true }), { size: 0.45, tone: "lo" });
+  // Context: the block's front face and the parts already fitted in stage 1.
+  const blockFace = `<g class="rb-ghost">${S(k.slabOf({ x: 140, y: -98, w: 48, d: 196, r: 6 }, -58, 279, P, 4, 1), { tone: "lo" })}</g>`;
+  const nose = S(G.disc(188, 241, 19, X0(0, 0, 0), P), { tone: "hi" });
+  const balCtx = S(G.disc(-4, 4, BAL.idler[2], X0(197, BAL.idler[0], BAL.idler[1]), P), { tone: "mid" }) + teeth(X0(197, BAL.idler[0], BAL.idler[1]), 4, BAL.idler[2], 28) + S(G.disc(-4, 4, BAL.shaft[2], X0(197, BAL.shaft[0], BAL.shaft[1]), P), { tone: "mid" }) + teeth(X0(197, BAL.shaft[0], BAL.shaft[1]), 4, BAL.shaft[2], 22);
+  f.part("block", blockFace + nose + balCtx);
+  // Cylinder head and camshafts (stage 3), with the cam sprockets and the intake adjuster.
+  const headFace = `<g class="rb-ghost">${S(k.slabOf({ x: 140, y: -74, w: 50, d: 148, r: 6 }, 221, 170, P, 4, 1), { tone: "lo" })}</g>`;
+  const cams = [CAM.in, CAM.ex].map(([y, z], i) => S(G.disc(-4, 4, CAM.r, X0(207, y, z), P), { tone: "mid" }) + teeth(X0(207, y, z), 4, CAM.r, 36) + (i === 0 ? S(G.disc(4, 15, 30, X0(207, y, z), P), { tone: "hi" }) : S(G.disc(4, 10, 16, X0(207, y, z), P), { tone: "mid" }))).join("");
+  f.part("head", headFace + cams, [0, 0, 220]);
+  // Three-stage sprocket on the crank nose.
+  const sp = [[197, 21, 18], [207, 24, 20], [216, 19, 16]].map(([x, r, n]) => S(G.disc(-3.5, 3.5, r, X0(x, 0, 0), P), { tone: "hi" }) + teeth(X0(x, 0, 0), 3.5, r, n)).join("");
+  f.part("sprocket3", sp, [140, 0, 0]);
+  // Balance shaft chain, its rails and tensioner.
+  const bal = loopOf(197, [[0, 0, 21], BAL.idler, BAL.shaft]);
+  f.part("balChain", chainSvg(P, bal, 2.2), [150, 0, 0]);
+  const balRails = [railPoly(runOf(bal, (y, z) => y > 0 && z > 10), -1, 5), railPoly(runOf(bal, (y) => y < 0), 1, 5)].map((poly) => S(G.prismOf(X0(0, 0, 0), poly, 192, 202, P), { tone: "mid" })).join("");
+  f.part("balRails", balRails, [150, 0, 0]);
+  f.part("balTensioner", S(G.disc(0, 14, 9, X0(188, -36, 70), P), { tone: "hi" }) + S(G.disc(14, 18, 11, X0(188, -36, 70), P), { tone: "mid" }), [120, 0, 0]);
+  // Camshaft chain, rails and tensioner.
+  const cam = loopOf(207, [[0, 0, 24], [...CAM.in, CAM.r], [...CAM.ex, CAM.r]], 3);
+  f.part("camChain", chainSvg(P, cam, 3), [160, 0, 0]);
+  const rails = [railPoly(runOf(cam, (y) => y > 0), -1, 8), railPoly(runOf(cam, (y) => y < 0), 1, 8)].map((poly) => S(G.prismOf(X0(0, 0, 0), poly, 201, 213, P), { tone: "mid" })).join("");
+  const upperRail = S(k.slabOf({ x: 201, y: -24, w: 12, d: 48, r: 3 }, CAM.in[1] + CAM.r + 6, 8, P, 3, 0.4), { tone: "mid" });
+  f.part("camRails", rails + upperRail, [160, 0, 0]);
+  // Oil pump chain down to where the pump's sprocket will be.
+  f.part("oilChain", chainSvg(P, loopOf(216, [[0, 0, 19], PUMP], 2), 2.2), [150, 0, 0]);
+  f.part("camTensioner", S(k.slabOf({ x: 194, y: -104, w: 22, d: 20, r: 3 }, 120, 36, P, 3, 0.6), { tone: "hi" }) + D([k.iso([205, -104, 156], P)], { size: 0.6 }), [120, 0, 0]);
+  // Bearing bracket over the intake camshaft, with its seven bolts.
+  const bracketPoly = [[-112, 300], [-10, 280], [20, 320], [10, 384], [-100, 392]];
+  const boltsAt = [[-54, 386], [-108, 360], [8, 330], [-104, 312], [-70, 288], [-40, 284], [-12, 288]];
+  f.part("bracket", S(G.prismOf(X0(0, 0, 0), bracketPoly, 220, 228, P), { tone: "mid" }) + S(G.disc(228, 232, 20, X0(0, ...CAM.in), P), { tone: "mid" }) + D(boltsAt.map(([y, z]) => k.iso([228, y, z], P)), { size: 0.9, tone: "hi" }), [120, 0, 30]);
+  f.part("controlValve", S(G.disc(232, 246, 11, X0(0, ...CAM.in), P), { tone: "hi" }) + S(G.disc(246, 252, 14, X0(0, ...CAM.in), P, { steps: 6 }), { tone: "hi" }), [120, 0, 0]);
+  // Lower and upper timing chain covers, then the vibration damper.
+  const lowerOutline = hull([[0, 0, 40], [...BAL.idler.slice(0, 2), 40], [...BAL.shaft.slice(0, 2), 36], [...PUMP.slice(0, 2), 36], [-60, 250, 30], [60, 250, 30]].flatMap(([y, z, r]) => Array.from({ length: 36 }, (_, i) => [y + r * Math.cos((i / 36) * 2 * Math.PI), z + r * Math.sin((i / 36) * 2 * Math.PI)])));
+  const lower = lowerOutline.map(([y, z]) => [y, Math.min(z, 262)]);
+  f.part("lowerCover", S(G.prismOf(X0(0, 0, 0), hull(lower), 222, 232, P), { tone: "mid" }) + L(k.sideRing([232, 0, 0], 30, "x", P, 40), { tone: "lo" }) + D(hull(lower).filter((_, i) => i % 5 === 0).map(([y, z]) => k.iso([232, y * 0.9, z * 0.9 + 4], P)), { size: 0.6 }), [180, 0, 0]);
+  const upperOutline = hull([[...CAM.in, CAM.r + 16], [...CAM.ex, CAM.r + 16], [-70, 266, 8], [70, 266, 8]].flatMap(([y, z, r]) => Array.from({ length: 36 }, (_, i) => [y + r * Math.cos((i / 36) * 2 * Math.PI), z + r * Math.sin((i / 36) * 2 * Math.PI)])));
+  f.part("upperCover", S(G.prismOf(X0(0, 0, 0), upperOutline, 246, 254, P), { tone: "mid" }) + L(k.sideRing([254, ...CAM.in], 16, "x", P, 32), { tone: "lo" }), [160, 0, 40]);
+  const damper = X0(236, 0, 0);
+  f.part("damper", S(G.disc(0, 26, 76, damper, P, { steps: 72 }), { tone: "hi" }) + L(G.circleOf(damper, 26, 40, P, 64), { tone: "lo" }) + D(G.dotsOf(damper, 26, 22, 4, P, { all: true }), { size: 0.6 }) + L(k.pathOf([k.iso([262, 0, 64], P), k.iso([262, 0, 74], P)]), { tone: "hi", className: "rb-mark" }), [240, 0, 0]);
+  return f.svg();
+}
+
+// ---------------------------------------------------------------- stage 2: oil pans and pump
+function pans() {
+  const f = figure({ id: "pans", label: "Under the block: the upper oil pan, the oil pump with its suction line, the oil baffle and the lower oil pan with its drain plug and oil level sensor, drawn apart downward.", fit: [[-210, -100, -560], [195, 100, -560], [-210, -100, 0], [195, 100, 0]], azimuth: 32, elevation: 24, width: 560, height: 520 });
+  const { P } = f;
+  f.part("block", `<g class="rb-ghost">${S(k.slabOf({ x: -205, y: -98, w: 393, d: 196, r: 6 }, -58, 40, P, 4, 1), { tone: "lo" })}</g>`);
+  const upper = { x: -205, y: -98, w: 393, d: 196, r: 6 };
+  const bolts = [-180, -120, -60, 0, 60, 120, 170].map((x) => k.iso([x, 98, -64], P));
+  f.part("upperPan", S(k.slabOf(upper, -112, 54, P, 4, 1), { tone: "mid", inner: L(k.sideSeam(upper, -64, P, 4), { tone: "faint" }) }) + L(k.planOutline(k.insetPlan(upper, 14), -58, P, 4), { tone: "lo" }) + D(bolts, { size: 0.6 }), [0, 0, -90]);
+  const pump = { x: 110, y: -45, w: 86, d: 90, r: 6 };
+  f.part("oilPump", S(k.slabOf(pump, -160, 40, P, 3, 0.8), { tone: "hi" }) + S(G.disc(0, 7, 24, X([196, 0, -140]), P), { tone: "mid" }) + D(k.corners(pump, 6).map(([x, y]) => k.iso([x, y, -120], P)), { size: 0.7 }), [0, 0, -190]);
+  const route = G.fillet([[110, -20, -150], [60, -20, -150], [40, -20, -165]], 12);
+  f.part("suction", tubePieces(route, 6, P, { maxLength: 60, spacing: 1 }).map((piece) => tubeSvg(piece, { tone: "mid" })).join("") + S(G.disc(0, 5, 20, Z([28, -20, -172]), P), { tone: "mid" }), [0, 0, -230]);
+  const baffle = { x: -120, y: -84, w: 300, d: 168, r: 10 };
+  f.part("baffle", S(k.slabOf(baffle, -125, 3, P, 6, 0.4), { tone: "lo", crease: "none" }) + L(k.planOutline(k.insetPlan(baffle, 20), -122, P, 6), { tone: "faint" }), [0, 0, -270]);
+  const sump = { x: -120, y: -90, w: 306, d: 180, r: 14 };
+  f.part("lowerPan", S(k.slabOf(sump, -184, 72, P, 6, 1.2), { tone: "mid", inner: L(k.sideSeam(sump, -118, P, 6), { tone: "faint" }) }) + S(G.disc(0, 8, 10, Y([120, 90, -160]), P), { tone: "hi" }) + D([-90, -30, 30, 90, 150].map((x) => k.iso([x, 90, -115], P)), { size: 0.55 }), [0, 0, -330]);
+  return f.svg();
+}
+
+// ---------------------------------------------------------------- stage 2: coolant pump and its belt
+function coolant() {
+  const f = figure({ id: "coolant", label: "The coolant pump driven by a toothed belt from a drive wheel on the end of a balance shaft, with the belt guard.", fit: [[-60, -230, -60], [100, -230, -60], [-60, 60, 140], [100, 60, 140]], azimuth: 30, elevation: 22 });
+  const { P } = f;
+  const shaft = X([-40, 0, 0]);
+  f.part("block", `<g class="rb-ghost">${S(k.slabOf({ x: -50, y: -60, w: 10, d: 110, r: 4 }, -50, 100, P, 3, 0.6), { tone: "lo" })}</g>` + S(G.disc(0, 40, 12, shaft, P), { tone: "mid" }));
+  const W = X([0, 0, 0]);
+  f.part("wheel", S(G.disc(0, 18, 22, W, P), { tone: "hi" }) + D(G.dotsOf(W, 18, 20, 24, P, { all: true }), { size: 0.45, tone: "lo" }) + S(G.disc(18, 24, 9, W, P, { steps: 6 }), { tone: "mid" }), [90, 0, 0]);
+  const PUMP2 = [-160, 70];
+  const pumpF = X([0, ...PUMP2]);
+  f.part("pump", S(k.slabOf({ x: -50, y: PUMP2[0] - 40, w: 46, d: 80, r: 8 }, PUMP2[1] - 40, 80, P, 4, 1), { tone: "mid" }) + S(G.disc(-4, 18, 28, pumpF, P), { tone: "hi" }) + D(G.dotsOf(pumpF, 18, 26, 30, P, { all: true }), { size: 0.45, tone: "lo" }), [0, -60, 0]);
+  const loop = loopOf(9, [[0, 0, 22], [...PUMP2, 28]], 1.5);
+  f.part("belt", tubePieces(loop, 2.4, P, { closed: true, maxLength: 80, spacing: 1, rings: { pitch: 4, tone: "lo" } }).map((piece) => tubeSvg(piece, { tone: "mid" })).join(""), [70, 0, 0]);
+  const guard = hull(loop.map(([, y, z]) => [y, z]).flatMap(([y, z]) => [[y * 1.06, z * 1.06]]));
+  f.part("guard", `<g class="rb-ghost">${S(G.prismOf(X([0, 0, 0]), guard, 26, 30, P), { tone: "mid" })}</g>`, [110, 0, 0]);
+  return f.svg();
+}
+
 export function buildFigures() {
-  return { overview: overview(), bore: bore(), piston: piston(), rings: rings(), block: jets(), balance: balance(), mains: mains(), plastigauge: plastigauge(), endplay: endplay(), rod: rod(), flange: flange() };
+  return { overview: overview(), bore: bore(), piston: piston(), rings: rings(), block: jets(), balance: balance(), mains: mains(), plastigauge: plastigauge(), endplay: endplay(), rod: rod(), flange: flange(), front: front(), pans: pans(), coolant: coolant() };
 }
