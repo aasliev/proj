@@ -10,6 +10,11 @@
 // Stage 2 (timing drive, covers, oil pans, coolant pump) lives in steps-stage2.mjs and is
 // spliced in here in assembly order: the rear crank seal goes on after the upper oil pan.
 import { VARIANTS2, SPEC2, GROUPS2, BEFORE_REAR, AFTER_REAR, DIAGRAMS2 } from "./steps-stage2.mjs";
+// Stage 3 (cylinder head, valvetrain, camshafts) replaces stage 2's placeholder step, and adds
+// the valvelift actuators after the valve timing check.
+import { VARIANTS3, SPEC3, HEAD_STEPS, AFTER_CHAIN_STEPS, DIAGRAMS3 } from "./steps-stage3.mjs";
+const STAGE2_AND_3 = BEFORE_REAR.flatMap((step) => (step.id === "head-gate" ? HEAD_STEPS : step.id === "valve-timing" ? [step, ...AFTER_CHAIN_STEPS] : [step]));
+for (const group of GROUPS2.before) if (group.id === "head") group.name = "Cylinder head and camshafts";
 
 export const VARIANTS = {
   rodBolt: {
@@ -663,7 +668,7 @@ export const STEPS = [
     say: "Measure the axial (side) clearance of each rod on its crank pin with feeler gauges.",
     tasks: [{ type: "measure", spec: "rodAxial", label: "Rod axial clearance", items: CYL }],
   },
-  ...BEFORE_REAR,
+  ...STAGE2_AND_3,
   // ---------------------------------------------------------------- rear crank seal (after the upper oil pan)
   {
     id: "flange-prep",
@@ -741,8 +746,8 @@ export const STEPS = [
   },
   ...AFTER_REAR,
 ];
-Object.assign(VARIANTS, VARIANTS2);
-Object.assign(SPEC, SPEC2);
+Object.assign(VARIANTS, VARIANTS2, VARIANTS3);
+Object.assign(SPEC, SPEC2, SPEC3);
 
 // Ring gap and groove specs depend on the oil ring version.
 export function specFor(id, variants) {
@@ -791,4 +796,4 @@ export const DIAGRAMS = {
     ],
   },
 };
-Object.assign(DIAGRAMS, DIAGRAMS2);
+Object.assign(DIAGRAMS, DIAGRAMS2, DIAGRAMS3);

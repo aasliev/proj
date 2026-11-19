@@ -43,7 +43,7 @@ function specFor(id) {
   return { ...table, unit: "mm", ref: id.startsWith("gap") ? "13 · p. 57" : "13 · p. 58" };
 }
 const fmt = (value) => (Math.abs(value) < 1 ? value.toFixed(3).replace(/0$/, "") : value.toFixed(2));
-const specText = (spec) => (spec.nominal ? `${fmt(spec.nominal)} mm ± ${fmt(spec.dev)} mm` : spec.limit === undefined ? `${fmt(spec.min)}–${fmt(spec.max)} mm` : `new ${fmt(spec.min)}–${fmt(spec.max)} mm · wear limit ${fmt(spec.limit)} mm`);
+const specText = (spec) => (spec.nominal ? `${fmt(spec.nominal)} mm ± ${fmt(spec.dev)} mm` : spec.limit === undefined ? (spec.min === 0 ? `max ${fmt(spec.max)} mm` : `${fmt(spec.min)}–${fmt(spec.max)} mm`) : `new ${fmt(spec.min)}–${fmt(spec.max)} mm · wear limit ${fmt(spec.limit)} mm`);
 function grade(spec, value) {
   if (!Number.isFinite(value)) return null;
   if (spec.nominal) return Math.abs(value - spec.nominal) <= spec.dev + 1e-9 ? "ok" : "bad";
@@ -423,7 +423,7 @@ function exportLog() {
 const sheet = root.querySelector("[data-print]");
 function printSheet() {
   const all = steps();
-  sheet.innerHTML = `<h1>EA888 Gen 2 (CAEB) · assembly checklist (stages 1–2)</h1><p>Versions: rod bolts ${esc(S.variants.rodBolt || "?")}, oil ring ${esc(S.variants.oilRing ? `${S.variants.oilRing}-piece` : "?")}, flange ${esc(S.variants.flange || "?")}. Values from the Audi repair manual for EA888 Gen II (06.2019); check each against your copy.</p>` + all.map((step, i) => {
+  sheet.innerHTML = `<h1>EA888 Gen 2 (CAEB) · assembly checklist (stages 1–3)</h1><p>Versions: rod bolts ${esc(S.variants.rodBolt || "?")}, oil ring ${esc(S.variants.oilRing ? `${S.variants.oilRing}-piece` : "?")}, flange ${esc(S.variants.flange || "?")}. Values from the Audi repair manual for EA888 Gen II (06.2019); check each against your copy.</p>` + all.map((step, i) => {
     const lines = tasksOf(step).map((task) => {
       if (task.type === "check") return task.items.map((x) => `<li>☐ ${esc(x)}</li>`).join("");
       if (task.type === "choice") { const r = task.options.find((o) => o.ok); return `<li>☐ ${esc(task.q)} <b>${esc(r.text)}</b></li>`; }

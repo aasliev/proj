@@ -480,6 +480,85 @@ function coolant() {
   return f.svg();
 }
 
+// ---------------------------------------------------------------- stage 3: cylinder head and camshafts
+const CYL_X = [132, 44, -44, -132];
+function head() {
+  const f = figure({ id: "head", label: "The cylinder head going onto the block: gasket, head with its valves, roller rocker levers, head bolts, the two camshafts, the cylinder head cover that carries the camshaft bearings, and the valvelift actuators.", fit: [[-210, -110, 120], [215, 110, 120], [-210, -110, 620], [215, 110, 620]], azimuth: 32, elevation: 28, width: 560, height: 520 });
+  const { P, V } = f;
+  const upper = { x: -205, y: -70, w: 393, d: 140, r: 6 };
+  const bores = CYL_X.map((x) => k.ring(x, 0, BORE, 221, P, 72)).join("");
+  const deck = k.slabOf(upper, 120, 101, P, 4, 1.2);
+  deck.fill += bores;
+  deck.top += bores;
+  f.part("block", `<path class="rb-bore" d="${bores}"/><g class="rb-holed rb-ghost">${S(deck, { tone: "lo" })}</g>`);
+  const HP = { x: -203, y: -74, w: 393, d: 148, r: 6 };
+  f.part("gasket", S(k.slabOf(HP, 221, 1.6, P, 4), { tone: "lo", crease: "none" }) + L(CYL_X.map((x) => k.ring(x, 0, BORE, 222.6, P, 72)).join(""), { tone: "faint" }), [0, 0, 40]);
+  // Head body: deck up to the spring deck, then the two cam bearing rails.
+  const body = S(k.slabOf(HP, 222.6, 77.4, P, 6, 1), { tone: "mid", inner: L(k.sideSeam(HP, 236, P, 6), { tone: "faint" }) }) + L(CYL_X.flatMap((x) => [-16, 16].map((dx) => k.pathOf([[x + dx - 10, 248], [x + dx + 10, 248], [x + dx + 10, 274], [x + dx - 10, 274]].map(([px, z]) => k.iso([px, 74, z], P)), true))).join(""), { tone: "lo" });
+  const rails = [-74, 64].map((y) => S(k.slabOf({ x: HP.x, y, w: HP.w, d: 10, r: 2 }, 300, 30, P, 3, 0.6), { tone: "mid" })).join("");
+  const tubes = CYL_X.map((x) => S(k.cylinder(x, 0, 12, 300, 30, P, 32, 0.5), { tone: "mid" }) + L(k.ring(x, 0, 7.5, 330, P, 24), { tone: "lo" })).join("");
+  f.part("headBody", body + rails + tubes, [0, 0, 130]);
+  // Roller rocker levers on their lifters, one per valve.
+  const rockers = [];
+  for (const sign of [-1, 1]) for (const x of CYL_X) for (const dx of [-16, 16]) {
+    const px = x + dx;
+    rockers.push([G.dot3([px, sign * 46, 306], V), S(k.slabOf({ x: px - 5, y: sign > 0 ? 26 : -66, w: 10, d: 40, r: 3 }, 302, 6, P, 3, 0.4), { tone: "hi" }) + S(G.disc(-4, 4, 5, X([px, sign * 48, 311]), P), { tone: "mid" })]);
+  }
+  f.part("rockers", f.sorted(rockers), [0, 0, 70]);
+  const boltAt = [];
+  for (const x of [-176, -88, 0, 88, 176]) for (const y of [-40, 40]) boltAt.push([x, y]);
+  f.part("headBolts", boltAt.map(([x, y]) => S(k.cylinder(x, y, 7, 300, 7, P, 6, 0.4), { tone: "hi" })).join(""), [0, 0, 230]);
+  // Camshafts with their lobes, sprockets and the intake adjuster.
+  const cams = [];
+  for (const [y, intake] of [[-54, true], [54, false]]) {
+    const F = X([0, y, 336]);
+    let from = -195;
+    for (const x of [...CYL_X].reverse()) {
+      cams.push([G.dot3([(from + x - 24) / 2, y, 336], V), S(G.disc(from, x - 24, 13, F, P), { tone: "mid" })]);
+      cams.push([G.dot3([x, y, 336], V), S(G.disc(x - 24, x + 24, 18, F, P), { tone: "hi" }) + L(G.arcOf(F, x - 8, 18, P) + G.arcOf(F, x + 8, 18, P), { tone: "lo" })]);
+      from = x + 24;
+    }
+    cams.push([G.dot3([(from + 200) / 2, y, 336], V), S(G.disc(from, 200, 13, F, P), { tone: "mid" })]);
+    cams.push([G.dot3([207, y, 336], V), S(G.disc(200, 214, 44, F, P), { tone: "mid" }) + D(G.dotsOf(F, 214, 42, 36, P, { all: true }), { size: 0.45, tone: "lo" }) + (intake ? S(G.disc(214, 226, 30, F, P), { tone: "hi" }) : "")]);
+  }
+  f.part("cams", f.sorted(cams), [0, 0, 150]);
+  // Cylinder head cover: the camshaft housing, sealed on silicone, six bolts down the middle.
+  const COVER = { x: -195, y: -74, w: 385, d: 148, r: 10 };
+  const coverBolts = [-160, -100, -40, 30, 90, 150].map((x) => k.iso([x, 0, 380], P));
+  f.part("housing", S(k.slabOf(COVER, 330, 50, P, 6, 1.4), { tone: "mid", inner: L(k.sideSeam(COVER, 338, P, 6), { tone: "faint" }) }) + L(CYL_X.map((x) => k.ring(x, 0, 15, 380, P, 32)).join(""), { tone: "lo" }) + D(coverBolts, { size: 0.9, tone: "hi" }) + L(k.ring(-185, -40, 7, 380, P, 20), { tone: "lo" }), [0, 0, 200]);
+  f.part("actuators", CYL_X.map((x) => S(k.cylinder(x + 24, 54, 9, 380, 16, P, 24, 0.5), { tone: "hi" }) + S(k.slabOf({ x: x + 20, y: 62, w: 8, d: 10, r: 1 }, 386, 7, P, 2), { tone: "mid", crease: "none" })).join(""), [0, 0, 90]);
+  return f.svg();
+}
+function deck() {
+  const f = figure({ id: "deck", label: "The cylinder head upside down on the bench with a straight edge laid across its gasket face and a feeler gauge slid under it.", fit: [[-210, -90, 0], [200, -90, 0], [-210, 90, 110], [200, 90, 110]], azimuth: 32, elevation: 30 });
+  const { P } = f;
+  const HP = { x: -203, y: -74, w: 393, d: 148, r: 6 };
+  const chambers = CYL_X.map((x) => k.ring(x, 0, BORE - 4, 80, P, 64)).join("");
+  f.part("head", S(k.slabOf(HP, 0, 80, P, 6, 1), { tone: "mid" }) + L(chambers, { tone: "lo" }) + D(CYL_X.flatMap((x) => [[x - 16, -24], [x + 16, -24], [x - 16, 24], [x + 16, 24]]).map(([x, y]) => k.iso([x, y, 80], P)), { size: 0.7, tone: "lo" }));
+  // Straight edge on the diagonal, and a feeler blade under its middle.
+  const dir = G.unit3([380, 120, 0]);
+  const F = G.frameOf([-190, -60, 86], dir, [0, 0, 1], G.cross3([0, 0, 1], dir));
+  f.part("straightedge", S(G.prismOf(F, [[-6, -10], [6, -10], [6, 10], [-6, 10]], 0, 400, P), { tone: "hi" }));
+  f.part("feeler", S(k.slabOf({ x: -10, y: 40, w: 70, d: 12, r: 2 }, 80, 0.6, P, 2), { tone: "hi", crease: "none" }));
+  return f.svg();
+}
+function valve() {
+  const f = figure({ id: "valve", label: "One valve with its guide in a section of the head, the valve stem seal, the valve spring and the spring retainer, drawn apart along the stem.", fit: [[-40, -40, -40], [40, 40, -40], [-40, -40, 220], [40, 40, 220]], azimuth: 30, elevation: 20, width: 420, height: 520 });
+  const { P } = f;
+  f.part("guide", `<g class="rb-ghost">${S(k.slabOf({ x: -32, y: -32, w: 64, d: 64, r: 4 }, 0, 40, P, 3, 0.6), { tone: "lo" })}</g>` + S(k.cylinder(0, 0, 5.5, 40, 12, P, 24, 0.3), { tone: "mid" }));
+  f.part("valve", S(k.cylinder(0, 0, 3, -20, 120, P, 16), { tone: "hi", crease: "none" }) + S(k.cylinder(0, 0, 17, -26, 6, P, 48, 0.4), { tone: "hi" }));
+  f.part("seal", S(k.cylinder(0, 0, 7, 50, 8, P, 28, 0.4), { tone: "hi" }), [0, 0, 40]);
+  const coils = [];
+  for (let i = 0; i <= 8; i++) coils.push(k.sideArc(0, 0, 12, 46 + i * 5, P, 24));
+  const side = [-V3(P)[1], V3(P)[0]];
+  const n = Math.hypot(...side);
+  const limbs = [1, -1].map((s) => k.segment([(s * 12 * side[0]) / n, (s * 12 * side[1]) / n, 46], [(s * 12 * side[0]) / n, (s * 12 * side[1]) / n, 86], P)).join("");
+  f.part("spring", L(coils.join("") + limbs, { tone: "mid" }), [0, 0, 70]);
+  f.part("retainer", S(k.cylinder(0, 0, 13, 86, 4, P, 32, 0.4), { tone: "hi" }) + S(k.cylinder(0, 0, 5, 90, 4, P, 16), { tone: "mid" }), [0, 0, 100]);
+  return f.svg();
+}
+const V3 = (P) => G.viewOf(P);
+
 export function buildFigures() {
-  return { overview: overview(), bore: bore(), piston: piston(), rings: rings(), block: jets(), balance: balance(), mains: mains(), plastigauge: plastigauge(), endplay: endplay(), rod: rod(), flange: flange(), front: front(), pans: pans(), coolant: coolant() };
+  return { overview: overview(), bore: bore(), piston: piston(), rings: rings(), block: jets(), balance: balance(), mains: mains(), plastigauge: plastigauge(), endplay: endplay(), rod: rod(), flange: flange(), front: front(), pans: pans(), coolant: coolant(), head: head(), deck: deck(), valve: valve() };
 }
