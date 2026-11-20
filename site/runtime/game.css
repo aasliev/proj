@@ -109,3 +109,8 @@
   .rb-print ul{margin:0;padding-left:0;list-style:none}
   .rb-print section{break-inside:avoid}
 }
+.rb-pending b{color:var(--rb-warn);font-weight:600}
+.rb-draft{border:1px solid var(--rb-warn);border-radius:8px;padding:10px 14px;margin:0 0 14px;color:var(--anatomy-text);line-height:1.5}
+.rb-draft strong{color:var(--rb-warn)}
+.rb-back{font:12px var(--anatomy-mono);color:var(--anatomy-muted);text-decoration:none}
+.rb-back:hover{color:var(--anatomy-strong)}

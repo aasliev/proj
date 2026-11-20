@@ -1,7 +1,8 @@
-// EA888 rebuild trainer: the step engine. Data (steps, specs, diagrams, figures) is
-// inlined by build.mjs as `DATA`.
+// Car fix trainer: the job engine. It knows nothing about any particular car: build.mjs inlines
+// one job's data as `DATA` (job meta, steps, groups, variants, specs, diagrams, figures).
 const D = __DATA__;
-const STORE = "ea888-rebuild-v1";
+const J = D.job;
+const STORE = J.storageKey || `carfix:${J.id}:v1`;
 const root = document.querySelector(".rb");
 const figBox = root.querySelector("[data-figure]");
 const card = root.querySelector("[data-card]");
@@ -24,34 +25,42 @@ const save = () => {
   try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (error) { /* ignore */ }
 };
 
-// ---------------------------------------------------------------- variants and visibility
-const matches = (when) => !when || Object.entries(when).every(([key, want]) => [want].flat().includes(S.variants[key]));
+// ---------------------------------------------------------------- variants, specs and visibility
+const matches = (when) => !when || Object.entries(when).every(([name, want]) => [want].flat().includes(S.variants[name]));
 const steps = () => D.steps.filter((step) => matches(step.when));
 const tasksOf = (step) => step.tasks.map((task, index) => ({ ...task, index })).filter((task) => matches(task.when));
 const key = (step, task, extra = "") => `${step.id}:${task.index}${extra}`;
 
+// A spec is a fixed range, or a table chosen by one of the job's versions. A spec the job's
+// data does not have yet is `pending`: readings are recorded but not graded.
 function specFor(id) {
-  if (D.spec[id]) return D.spec[id];
-  const two = S.variants.oilRing === "2";
-  const table = {
-    gap1: two ? { min: 0.2, max: 0.4, limit: 0.8 } : { min: 0.3, max: 0.4, limit: 0.6 },
-    gap2: two ? { min: 0.2, max: 0.4, limit: 0.8 } : { min: 0.4, max: 0.5, limit: 0.7 },
-    gapOil: { min: 0.25, max: 0.5, limit: 0.8 },
-    groove1: { min: 0.06, max: 0.09, limit: 0.2 },
-    groove2: { min: 0.03, max: 0.06, limit: 0.15 },
-  }[id];
-  return { ...table, unit: "mm", ref: id.startsWith("gap") ? "13 · p. 57" : "13 · p. 58" };
+  const spec = D.spec[id];
+  if (!spec) return { pending: true, unit: "mm", ref: "" };
+  if (spec.byVariant) {
+    const picked = spec.byVariant.values[S.variants[spec.byVariant.key]];
+    return picked ? { unit: spec.unit, ref: spec.ref, ...picked } : { pending: true, unit: spec.unit, ref: spec.ref, why: `choose the ${D.variants[spec.byVariant.key]?.q.toLowerCase() || "version"} first` };
+  }
+  return spec;
 }
 const fmt = (value) => (Math.abs(value) < 1 ? value.toFixed(3).replace(/0$/, "") : value.toFixed(2));
-const specText = (spec) => (spec.nominal ? `${fmt(spec.nominal)} mm ± ${fmt(spec.dev)} mm` : spec.limit === undefined ? (spec.min === 0 ? `max ${fmt(spec.max)} mm` : `${fmt(spec.min)}–${fmt(spec.max)} mm`) : `new ${fmt(spec.min)}–${fmt(spec.max)} mm · wear limit ${fmt(spec.limit)} mm`);
+function specText(spec) {
+  const u = spec.unit || "mm";
+  if (spec.pending) return spec.why ? `spec: ${spec.why}` : "spec not loaded yet";
+  if (spec.nominal) return `${fmt(spec.nominal)} ${u} ± ${fmt(spec.dev)} ${u}`;
+  if (spec.limit === undefined) return spec.min === 0 ? `max ${fmt(spec.max)} ${u}` : `${fmt(spec.min)}–${fmt(spec.max)} ${u}`;
+  return `new ${fmt(spec.min)}–${fmt(spec.max)} ${u} · wear limit ${fmt(spec.limit)} ${u}`;
+}
 function grade(spec, value) {
   if (!Number.isFinite(value)) return null;
+  if (spec.pending) return "unchecked";
   if (spec.nominal) return Math.abs(value - spec.nominal) <= spec.dev + 1e-9 ? "ok" : "bad";
   if (value >= spec.min - 1e-9 && value <= spec.max + 1e-9) return "ok";
   if (value < spec.min) return "low";
-  return value <= spec.limit + 1e-9 ? "worn" : "bad";
+  return spec.limit !== undefined && value <= spec.limit + 1e-9 ? "worn" : "bad";
 }
-const GRADE = { ok: "in spec", worn: "past new spec, within wear limit", low: "below new spec", bad: "out of limit: replace or repair" };
+const GRADE = { ok: "in spec", worn: "past new spec, within wear limit", low: "below spec", bad: "out of limit: replace or repair", unchecked: "recorded, not graded" };
+const refLine = (ref) => (ref ? `${J.source.prefix}${ref}` : J.source.name);
+const stageValue = (st) => (st.pending ? "spec not loaded" : st.nm !== undefined ? `${st.nm} Nm` : st.deg !== undefined ? `${st.deg}° further` : "");
 
 // ---------------------------------------------------------------- task completion
 function taskDone(step, task) {
@@ -73,33 +82,44 @@ function markDone(step) {
 }
 
 // ---------------------------------------------------------------- figure
-const figures = {};
-for (const [id, svg] of Object.entries(D.figures)) figures[id] = svg;
+// Each figure part is placed, apart (waiting, shifted by its data-apart offset) or hidden.
+// Steps install parts and remove parts; a part's state comes from replaying those events.
 let shownFig = "";
-let lastInstalled = new Set();
-function renderFigure(step, fresh) {
+let frameTimer = 0;
+function partStates(step) {
   const all = steps();
   const index = all.indexOf(step);
-  const before = new Set(all.slice(0, index).flatMap((s) => s.install || []));
-  const later = new Set(all.slice(index + 1).flatMap((s) => s.install || []));
-  const mine = new Set(step.install || []);
+  const first = new Map();
+  for (const s of all) {
+    for (const name of s.remove || []) if (!first.has(name)) first.set(name, "remove");
+    for (const name of s.install || []) if (!first.has(name)) first.set(name, "install");
+  }
+  const state = new Map();
+  for (const [name, kind] of first) state.set(name, kind === "install" ? "hidden" : "placed");
+  for (const s of all.slice(0, index)) {
+    for (const name of s.remove || []) state.set(name, "hidden");
+    for (const name of s.install || []) state.set(name, "placed");
+  }
   const done = stepDone(step);
+  for (const name of step.remove || []) state.set(name, done ? "apart" : "placed");
+  for (const name of step.install || []) state.set(name, done ? "placed" : "apart");
+  return state;
+}
+function renderFigure(step, fresh) {
   if (shownFig !== step.figure) {
-    figBox.innerHTML = figures[step.figure];
+    figBox.innerHTML = D.figures[step.figure];
     const svg = figBox.querySelector("svg");
     svg.setAttribute("data-view", svg.getAttribute("viewBox"));
     shownFig = step.figure;
-    lastInstalled = new Set();
   }
+  const states = partStates(step);
+  const moving = new Set([...(step.install || []), ...(step.remove || [])]);
   for (const g of figBox.querySelectorAll("[data-part]")) {
     const name = g.dataset.part;
     const [dx, dy] = g.dataset.apart.split(",").map(Number);
-    let state = "placed";
-    if (mine.has(name)) state = done ? "placed" : "apart";
-    else if (before.has(name)) state = "placed";
-    else if (later.has(name)) state = "hidden";
+    const state = states.get(name) || "placed";
     g.style.display = state === "hidden" ? "none" : "";
-    // Slide home when the step completes; jump when the figure or step changes.
+    // Slide when the step completes; jump when the figure or step changes.
     const target = state === "apart" ? `translate(${dx}px, ${dy}px)` : "translate(0px, 0px)";
     if (g.style.transform !== target) {
       g.style.transition = fresh || still.matches ? "none" : "transform .9s cubic-bezier(.32,.72,0,1)";
@@ -109,16 +129,13 @@ function renderFigure(step, fresh) {
     g.toggleAttribute("data-focus", lit);
     for (const solid of g.querySelectorAll(".iso-solid")) solid.toggleAttribute("data-lit", lit);
   }
-  // Once the step is done, zoom to the assembled parts after they have slid home.
   clearTimeout(frameTimer);
-  if (done && !fresh && !still.matches) frameTimer = setTimeout(() => frameFigure(new Set()), 950);
-  else frameFigure(done ? new Set() : mine);
+  frameFigure(moving);
 }
-let frameTimer = 0;
 
-// Zoom the figure to what it shows in this step: every visible part where it sits, plus the
-// parts of this step where they wait, so nothing jumps as they slide home.
-function frameFigure(mine) {
+// Zoom the figure to what it shows in this step: every visible part where it sits, plus where
+// this step's parts wait, so nothing jumps as they slide.
+function frameFigure(moving) {
   const svg = figBox.querySelector("svg");
   if (!svg) return;
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -127,7 +144,7 @@ function frameFigure(mine) {
     const box = g.getBBox();
     if (!box.width && !box.height) continue;
     const [dx, dy] = g.dataset.apart.split(",").map(Number);
-    const shifts = mine.has(g.dataset.part) ? [[0, 0], [dx, dy]] : [[0, 0]];
+    const shifts = moving.has(g.dataset.part) ? [[0, 0], [dx, dy]] : [[0, 0]];
     for (const [sx, sy] of shifts) {
       x0 = Math.min(x0, box.x + sx); y0 = Math.min(y0, box.y + sy);
       x1 = Math.max(x1, box.x + box.width + sx); y1 = Math.max(y1, box.y + box.height + sy);
@@ -139,7 +156,6 @@ function frameFigure(mine) {
   let w = Math.max(x1 - x0 + 40, W * 0.45), h = Math.max(y1 - y0 + 40, H * 0.45);
   if (w / h > W / H) h = (w * H) / W; else w = (h * W) / H;
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-  svg.style.transition = "none";
   svg.setAttribute("viewBox", `${(cx - w / 2).toFixed(1)} ${(cy - h / 2).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`);
 }
 
@@ -173,6 +189,14 @@ function choiceView(step, task) {
     return `<button type="button" class="rb-opt" data-choice="${k}" data-i="${i}" ${state ? `data-state="${state}"` : ""} ${answer === "ok" ? "disabled" : ""}>${esc(o.text)}</button>`;
   }).join("")}</div>${picked !== undefined ? `<p class="rb-why" data-state="${task.options[picked].ok ? "right" : "wrong"}">${esc(task.options[picked].why)}</p>` : ""}</div>`;
 }
+// Outlines for bolt-order diagrams, in a 300 × 300 box.
+const OUTLINES = {
+  flange: `<path class="rb-cap" d="M60 40 Q150 -6 240 40 L262 210 Q150 300 38 210 Z"/><circle class="rb-hub" cx="150" cy="150" r="52"/>`,
+  cover: `<path class="rb-cap" d="M70 26 Q150 4 230 26 L262 120 L244 230 Q150 296 56 230 L38 120 Z"/><circle class="rb-hub" cx="150" cy="190" r="30"/>`,
+  bracket: `<path class="rb-cap" d="M40 92 L150 34 L262 124 L196 260 L72 256 Z"/><circle class="rb-hub" cx="186" cy="132" r="34"/>`,
+  pan: `<rect class="rb-cap" x="28" y="30" width="244" height="232" rx="14"/>`,
+  wheel: `<circle class="rb-cap" cx="150" cy="150" r="128"/><circle class="rb-hub" cx="150" cy="150" r="34"/>`,
+};
 function orderView(step, task) {
   const k = key(step, task);
   const d = D.diagrams[task.diagram];
@@ -181,34 +205,22 @@ function orderView(step, task) {
   const total = d.bolts.length;
   let shapes = "";
   let marks = "";
-  const W = 300, H = 300;
-  if (task.diagram === "mains") {
-    // Five caps in a column, as in the manual's figure; side bolt arrows at caps 2–4.
+  if (d.caps) {
+    // Bearing caps in a column; arrows for the side bolts.
     const capH = 34, gap = 18, top = 22;
     for (let c = 0; c < d.caps; c++) {
       const y = top + c * (capH + gap);
       shapes += `<rect class="rb-cap" x="70" y="${y}" width="160" height="${capH}" rx="5"/>`;
-      if (d.side.includes(c)) shapes += `<path class="rb-side" d="M18 ${y + capH / 2}h34m-8 -6l8 6l-8 6M282 ${y + capH / 2}h-34m8 -6l-8 6l8 6"/><text class="rb-side-t" x="10" y="${y + capH / 2 + 4}">A</text><text class="rb-side-t" x="284" y="${y + capH / 2 + 4}">A</text>`;
+      if ((d.side || []).includes(c)) shapes += `<path class="rb-side" d="M18 ${y + capH / 2}h34m-8 -6l8 6l-8 6M282 ${y + capH / 2}h-34m8 -6l-8 6l8 6"/><text class="rb-side-t" x="10" y="${y + capH / 2 + 4}">A</text><text class="rb-side-t" x="284" y="${y + capH / 2 + 4}">A</text>`;
     }
-    d.bolts.forEach((b, i) => {
-      const x = b.side ? 205 : 95;
-      const y = top + b.cap * (capH + gap) + capH / 2;
-      marks += boltMark(k, b, i, x, y, got);
-    });
-    shapes += `<text class="rb-end" x="150" y="${top - 8}">${esc("bearing cap 1 / 5: check orientation in your manual, p. 38")}</text>`;
+    d.bolts.forEach((b, i) => { marks += boltMark(k, b, i, b.side ? 205 : 95, top + b.cap * (capH + gap) + capH / 2, got); });
+    if (d.label) shapes += `<text class="rb-end" x="150" y="${top - 8}">${esc(d.label)}</text>`;
   } else {
-    // Outlines roughly as in the manual's figures: rear flange, timing covers, bearing bracket, oil pans.
-    const outline = {
-      flange: `<path class="rb-cap" d="M60 40 Q150 -6 240 40 L262 210 Q150 300 38 210 Z"/><circle class="rb-hub" cx="150" cy="150" r="52"/>`,
-      cover: `<path class="rb-cap" d="M70 26 Q150 4 230 26 L262 120 L244 230 Q150 296 56 230 L38 120 Z"/><circle class="rb-hub" cx="150" cy="190" r="30"/>`,
-      bracket: `<path class="rb-cap" d="M40 92 L150 34 L262 124 L196 260 L72 256 Z"/><circle class="rb-hub" cx="186" cy="132" r="34"/>`,
-      pan: `<rect class="rb-cap" x="28" y="30" width="244" height="232" rx="14"/>`,
-    }[d.shape || "flange"];
-    shapes += outline;
+    shapes += OUTLINES[d.shape || "flange"];
     d.bolts.forEach((b, i) => { marks += boltMark(k, b, i, 30 + b.x * 2.4, 22 + b.y * 2.4, got); });
   }
-  const status = got.length === total ? `<p class="rb-why" data-state="right">Right: ${esc(d.ref)}. ${task.diagram === "mains" ? "Middle cap first, then outward." : ""}</p>` : `<p class="rb-help">${garage() ? "Order shown as in the manual." : `Click bolt ${next} of ${total}.`}</p>`;
-  return `<div class="rb-q"><p>${esc(task.q)}</p><svg class="rb-diagram" viewBox="0 0 ${W} ${H}" role="group" aria-label="Bolt pattern">${shapes}${marks}</svg>${status}</div>`;
+  const status = got.length === total ? `<p class="rb-why" data-state="right">Right. ${esc(refLine(d.ref))}.${d.hint ? ` ${esc(d.hint)}` : ""}</p>` : `<p class="rb-help">${garage() ? "Order shown as in the source." : `Click bolt ${next} of ${total}.`}</p>`;
+  return `<div class="rb-q"><p>${esc(task.q)}</p><svg class="rb-diagram" viewBox="0 0 300 300" role="group" aria-label="Bolt pattern">${shapes}${marks}</svg>${status}</div>`;
 }
 function boltMark(k, b, i, x, y, got) {
   const known = garage() || got.includes(b.n);
@@ -219,9 +231,10 @@ function torqueView(step, task) {
   return `<div class="rb-q"><p><strong>${esc(task.what)}</strong>${task.tool ? ` · ${esc(task.tool)}` : ""}</p>${task.note ? `<p class="rb-help">${esc(task.note)}</p>` : ""}<ol class="rb-stages">${task.stages.map((st, i) => {
     const sk = `${k}.${i}`;
     const ok = S.torque[sk];
-    const value = st.nm !== undefined ? `${st.nm} Nm` : st.deg !== undefined ? `${st.deg}° further` : "";
     if (st.check) return `<li><label><input type="checkbox" data-torque="${sk}" ${ok ? "checked" : ""}><span>${esc(st.bolts)}</span></label></li>`;
-    if (garage() || ok) return `<li ${ok ? "data-on" : ""}><span>${esc(st.bolts)}</span><b>${value}</b>${garage() ? `<label class="rb-tick"><input type="checkbox" data-torque="${sk}" ${ok ? "checked" : ""}> done</label>` : ""}</li>`;
+    // A value the job's data doesn't have yet: tick it off once you've applied the figure from your source.
+    if (st.pending) return `<li class="rb-pending"><label><input type="checkbox" data-torque="${sk}" ${ok ? "checked" : ""}><span>${esc(st.bolts)} <b>spec not loaded</b>. Torque to the value in your licensed data.</span></label></li>`;
+    if (garage() || ok) return `<li ${ok ? "data-on" : ""}><span>${esc(st.bolts)}</span><b>${stageValue(st)}</b>${garage() ? `<label class="rb-tick"><input type="checkbox" data-torque="${sk}" ${ok ? "checked" : ""}> done</label>` : ""}</li>`;
     const unit = st.nm !== undefined ? "Nm" : "°";
     return `<li><span>${esc(st.bolts)}</span><span class="rb-entry"><input type="number" inputmode="decimal" data-torque-in="${sk}" aria-label="${esc(st.bolts)} in ${unit}"><em>${unit}</em><button type="button" class="rb-opt" data-torque-set="${sk}">Set</button></span><span class="rb-hint" data-hint="${sk}"></span></li>`;
   }).join("")}</ol></div>`;
@@ -229,13 +242,14 @@ function torqueView(step, task) {
 function measureView(step, task) {
   const k = key(step, task);
   const spec = specFor(task.spec);
+  const unit = spec.unit || "mm";
   const rows = task.items.map((item, i) => {
     const value = S.values[`${k}.${i}`];
     const g = grade(spec, value);
-    return `<tr><th>${esc(item)}</th><td><input type="number" step="0.001" inputmode="decimal" data-value="${k}.${i}" value="${Number.isFinite(value) ? value : ""}" aria-label="${esc(item)} in mm"></td><td>${g ? `<span class="rb-grade" data-grade="${g}">${GRADE[g]}</span>` : ""}</td></tr>`;
+    return `<tr><th>${esc(item)}</th><td><input type="number" step="0.001" inputmode="decimal" data-value="${k}.${i}" value="${Number.isFinite(value) ? value : ""}" aria-label="${esc(item)} in ${unit}"></td><td>${g ? `<span class="rb-grade" data-grade="${g}">${GRADE[g]}</span>` : ""}</td></tr>`;
   }).join("");
   const bad = task.items.some((_, i) => ["bad", "low"].includes(grade(spec, S.values[`${k}.${i}`])));
-  return `<div class="rb-q"><p><strong>${esc(task.label)}</strong> · ${specText(spec)} <em>${esc(spec.ref)}</em></p><div class="rb-table-wrap"><table class="rb-table">${rows}</table></div><div class="rb-row"><button type="button" class="rb-opt" data-practice="${k}">Fill practice readings</button><button type="button" class="rb-opt" data-clear="${k}">Clear</button></div>${bad ? `<p class="rb-why" data-state="wrong">At least one reading is outside the manual's spec. Do not build on it: find the cause and replace or repair the part first.</p>` : ""}</div>`;
+  return `<div class="rb-q"><p><strong>${esc(task.label)}</strong> · ${esc(specText(spec))} ${spec.ref ? `<em>${esc(refLine(spec.ref))}</em>` : ""}</p><div class="rb-table-wrap"><table class="rb-table">${rows}</table></div><div class="rb-row">${spec.pending ? "" : `<button type="button" class="rb-opt" data-practice="${k}">Fill practice readings</button>`}<button type="button" class="rb-opt" data-clear="${k}">Clear</button></div>${bad ? `<p class="rb-why" data-state="wrong">At least one reading is outside the spec. Do not build on it: find the cause and replace or repair the part first.</p>` : ""}${spec.pending ? `<p class="rb-help">No spec in this job's data yet: compare your readings with your licensed data.</p>` : ""}</div>`;
 }
 const VIEWS = { variant: variantView, check: checkView, choice: choiceView, order: orderView, torque: torqueView, measure: measureView, note: (step, task) => `<p class="rb-note">${esc(task.text)}</p>` };
 
@@ -251,11 +265,10 @@ function render(fresh = false) {
     <p class="rb-kicker">${esc(group.name)} · step ${S.step + 1} of ${all.length}</p>
     <h2>${esc(step.title)}</h2>
     <p class="rb-say">${esc(step.say)}</p>
-    <p class="rb-ref">Repair manual, Rep. Gr. ${esc(step.ref)}</p>
+    <p class="rb-ref">${esc(refLine(step.ref))}</p>
     ${tasks.map((task) => `<section class="rb-task" ${taskDone(step, task) ? "data-done" : ""}>${VIEWS[task.type](step, task)}</section>`).join("")}
     <div class="rb-nav"><button type="button" class="rb-btn" data-go="-1" ${S.step === 0 ? "disabled" : ""}>Back</button><span class="rb-state">${done ? "Step complete" : garage() ? "Tick off as you go" : "Answer every task to continue"}</span><button type="button" class="rb-btn rb-primary" data-go="1" ${S.step === all.length - 1 || (!done && !garage()) ? "disabled" : ""}>Next step</button></div>`;
   renderFigure(step, fresh);
-  // Step list, by group.
   list.innerHTML = D.groups.map((g) => {
     const items = all.map((s, i) => [s, i]).filter(([s]) => s.group === g.id);
     if (!items.length) return "";
@@ -268,10 +281,10 @@ function render(fresh = false) {
   root.dataset.mode = S.mode;
 }
 
-function update(step, slide = true) {
+function update(step) {
   const newly = markDone(step);
   save();
-  render(!slide);
+  render(false);
   if (newly) card.querySelector(".rb-state")?.classList.add("rb-pop");
 }
 const current = () => steps()[S.step];
@@ -307,14 +320,15 @@ root.addEventListener("click", (event) => {
     t.classList.remove("rb-shake");
     void t.getBoundingClientRect();
     t.classList.add("rb-shake");
-    readout.textContent = `Not that one: bolt ${got.length + 1} comes next. ${current().id === "main-torque" ? "Work from the middle cap outward." : ""}`;
+    const task = tasksOf(step).find((x) => key(step, x) === k);
+    const hint = task ? D.diagrams[task.diagram].hint : "";
+    readout.textContent = `Not that one: bolt ${got.length + 1} comes next.${hint ? ` ${hint}` : ""}`;
     save();
     return;
   }
   if (t.dataset.torqueSet) {
     const sk = t.dataset.torqueSet;
-    const [stepId, rest] = sk.split(":");
-    const [ti, si] = rest.split(".").map(Number);
+    const [ti, si] = sk.split(":")[1].split(".").map(Number);
     const st = step.tasks[ti].stages[si];
     const input = card.querySelector(`[data-torque-in="${sk}"]`);
     const value = Number(input.value);
@@ -325,9 +339,8 @@ root.addEventListener("click", (event) => {
       return update(step);
     }
     S.mistakes++;
-    hint.textContent = input.value === "" ? "Enter a value." : value > want ? "Too high: check the manual's figure." : "Too low: check the manual's figure.";
+    hint.textContent = input.value === "" ? "Enter a value." : value > want ? "Too high: check the spec." : "Too low: check the spec.";
     save();
-    void stepId;
     return;
   }
   if (t.dataset.practice) {
@@ -369,7 +382,7 @@ root.addEventListener("click", (event) => {
   if (t.dataset.action === "export") return exportLog();
   if (t.dataset.action === "print") return window.print();
   if (t.dataset.action === "reset") {
-    if (confirm("Clear all progress, answers and measurements saved in this browser?")) {
+    if (confirm("Clear all progress, answers and measurements for this job saved in this browser?")) {
       S = blank();
       save();
       render(true);
@@ -395,18 +408,17 @@ root.addEventListener("change", (event) => {
   }
 });
 
-// A log of everything entered, to keep with the engine's paperwork.
+// A log of everything entered, to keep with the car's paperwork.
 function exportLog() {
-  const all = steps();
-  const out = { engine: "EA888 Gen 2 · CAEB", exported: new Date().toISOString(), variants: S.variants, steps: [] };
-  for (const step of all) {
-    const entry = { id: step.id, title: step.title, ref: step.ref, done: !!S.done[step.id], measurements: [] };
+  const out = { job: J.title, vehicle: J.vehicleLine, source: J.source.name, exported: new Date().toISOString(), versions: S.variants, steps: [] };
+  for (const step of steps()) {
+    const entry = { id: step.id, title: step.title, ref: refLine(step.ref), done: !!S.done[step.id], measurements: [] };
     for (const task of tasksOf(step)) {
       if (task.type !== "measure") continue;
       const spec = specFor(task.spec);
       task.items.forEach((item, i) => {
         const value = S.values[`${key(step, task)}.${i}`];
-        if (Number.isFinite(value)) entry.measurements.push({ what: `${task.label}: ${item}`, value, unit: "mm", spec: specText(spec), result: GRADE[grade(spec, value)] });
+        if (Number.isFinite(value)) entry.measurements.push({ what: `${task.label}: ${item}`, value, unit: spec.unit || "mm", spec: specText(spec), result: GRADE[grade(spec, value)] });
       });
     }
     out.steps.push(entry);
@@ -414,27 +426,27 @@ function exportLog() {
   const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "ea888-rebuild-log.json";
+  a.download = `${J.id}-log.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-// Printable checklist: every step with its specs, built once.
+// Printable checklist: every step with its specs and the readings entered so far.
 const sheet = root.querySelector("[data-print]");
 function printSheet() {
-  const all = steps();
-  sheet.innerHTML = `<h1>EA888 Gen 2 (CAEB) · assembly checklist (stages 1–3)</h1><p>Versions: rod bolts ${esc(S.variants.rodBolt || "?")}, oil ring ${esc(S.variants.oilRing ? `${S.variants.oilRing}-piece` : "?")}, flange ${esc(S.variants.flange || "?")}. Values from the Audi repair manual for EA888 Gen II (06.2019); check each against your copy.</p>` + all.map((step, i) => {
+  const versions = Object.entries(D.variants).map(([name, v]) => `${v.q}: ${S.variants[name] ? v.options.find((o) => o.id === S.variants[name])?.label : "____"}`).join(" · ");
+  sheet.innerHTML = `<h1>${esc(J.title)} · checklist</h1><p>${esc(J.vehicleLine)}. Source: ${esc(J.source.name)}; check each value against it.${versions ? ` Versions: ${esc(versions)}.` : ""}</p>` + steps().map((step, i) => {
     const lines = tasksOf(step).map((task) => {
       if (task.type === "check") return task.items.map((x) => `<li>☐ ${esc(x)}</li>`).join("");
       if (task.type === "choice") { const r = task.options.find((o) => o.ok); return `<li>☐ ${esc(task.q)} <b>${esc(r.text)}</b></li>`; }
-      if (task.type === "torque") return `<li>☐ ${esc(task.what)}: ${task.stages.map((st) => (st.check ? esc(st.bolts) : `${esc(st.bolts)} ${st.nm !== undefined ? `${st.nm} Nm` : `${st.deg}°`}`)).join(" → ")}</li>`;
-      if (task.type === "order") return `<li>☐ Tightening sequence per manual figure (Rep. Gr. ${esc(D.diagrams[task.diagram].ref)})</li>`;
-      if (task.type === "measure") { const spec = specFor(task.spec); return `<li>☐ ${esc(task.label)} (${specText(spec)}): ${task.items.map((it, j) => `${esc(it)} ${Number.isFinite(S.values[`${key(step, task)}.${j}`]) ? S.values[`${key(step, task)}.${j}`] : "____"}`).join(" · ")}</li>`; }
+      if (task.type === "torque") return `<li>☐ ${esc(task.what)}: ${task.stages.map((st) => (st.check ? esc(st.bolts) : `${esc(st.bolts)} ${st.pending ? "____ (from your data)" : stageValue(st)}`)).join(" → ")}</li>`;
+      if (task.type === "order") return `<li>☐ Tightening sequence per ${esc(refLine(D.diagrams[task.diagram].ref))}</li>`;
+      if (task.type === "measure") { const spec = specFor(task.spec); return `<li>☐ ${esc(task.label)} (${esc(specText(spec))}): ${task.items.map((it, j) => `${esc(it)} ${Number.isFinite(S.values[`${key(step, task)}.${j}`]) ? S.values[`${key(step, task)}.${j}`] : "____"}`).join(" · ")}</li>`; }
       if (task.type === "variant") return task.keys.map((name) => `<li>☐ ${esc(D.variants[name].q)}: ${esc(S.variants[name] || "____")}</li>`).join("");
       if (task.type === "note") return `<li>${esc(task.text)}</li>`;
       return "";
     }).join("");
-    return `<section><h2>${i + 1}. ${esc(step.title)} <small>Rep. Gr. ${esc(step.ref)}</small></h2><ul>${lines}</ul></section>`;
+    return `<section><h2>${i + 1}. ${esc(step.title)} <small>${esc(refLine(step.ref))}</small></h2><ul>${lines}</ul></section>`;
   }).join("");
 }
 window.addEventListener("beforeprint", printSheet);

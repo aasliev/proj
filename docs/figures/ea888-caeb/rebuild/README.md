@@ -44,8 +44,11 @@ node docs/figures/ea888-caeb/rebuild/build.mjs --dark   # ea888-rebuild-dark.htm
 | `steps-stage2.mjs` | Stage 2, timing drive, covers, oil pans, coolant pump |
 | `steps-stage3.mjs` | Stage 3, cylinder head, valvetrain, camshafts |
 | `figures.mjs` | The drawings, built with the Anatomy skill in `.claude/skills/anatomy` |
-| `game.js`, `game.css` | The game itself |
 | `build.mjs` | Puts it all into one HTML file |
+
+The game itself is the shared job engine in `site/runtime/`, and the job's settings
+(title, source, version-dependent ring specs) are in `site/jobs/ea888-caeb-assembly/job.mjs`.
+The same trainer is also a page of the car fixes site: see `site/README.md`.
 
 ## Important
 
