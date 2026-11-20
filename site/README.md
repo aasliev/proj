@@ -23,6 +23,10 @@ its own. `site/dist/` is not committed: build it after cloning.
 |---|---|---|
 | `ea888-caeb-assembly`: EA888 Gen 2 (CAEB) engine assembly, 70 steps | Ready, **private** | Audi repair manual (copyrighted) |
 | `a4-b8-front-brakes`: Audi A4 B8 front pads and discs, 17 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-oil-change`: engine oil and filter change (2.0 TFSI), 10 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-brake-fluid`: brake fluid change, up to 10 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-fluid-check`: check and top up oil, coolant, brake and washer fluid, 5 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-wheel-swap`: wheel swap and tyre check, up to 8 steps | **Draft** | Licensed data, not loaded yet |
 
 A **draft** has the full procedure, but no specs: torques show as "spec not loaded" and
 measurements are recorded without a grade. Nothing in it is a guessed number.
@@ -44,7 +48,12 @@ never publish a build that includes it.
 3. Run `node site/build.mjs`. The build stops with a message if a step names a figure,
    part, group, diagram or version that doesn't exist.
 
-The brake job (`jobs/a4-b8-front-brakes/job.mjs`) is the simplest example to copy.
+The fluid check (`jobs/a4-b8-fluid-check/job.mjs`) is the simplest example to copy. Jobs can
+share drawings and bolt patterns: the wheel swap reuses the brake job's drawing, and
+`lib/diagrams.mjs` holds the wheel star pattern.
+
+A spec can also be marked not graded on purpose, with a reason shown in its place:
+`{ pending: true, unit: "bar", why: "from the label inside the fuel filler flap" }`.
 
 ### Step format
 

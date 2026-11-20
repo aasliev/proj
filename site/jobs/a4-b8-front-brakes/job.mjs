@@ -4,6 +4,7 @@
 // the page shows "spec not loaded" and grades nothing. Fill SPEC and the torque stages from
 // your licensed source, set `ref` on each step to its page, then set status to "ready".
 import { buildFigures } from "./figures.mjs";
+import { wheelStar } from "../../lib/diagrams.mjs";
 
 export const meta = {
   id: "a4-b8-front-brakes",
@@ -311,21 +312,7 @@ const STEPS = [
   },
 ];
 
-// Star order for a five-bolt wheel: each bolt is followed by the one across from it.
-const star = [0, 2, 4, 1, 3];
-const DIAGRAMS = {
-  wheel: {
-    ref: "",
-    shape: "wheel",
-    hint: "Go across the hub each time, not round it.",
-    bolts: star.map((pos, i) => {
-      const t = (-90 + pos * 72) * (Math.PI / 180);
-      return { n: i + 1, x: 50 + 30 * Math.cos(t), y: 53 + 30 * Math.sin(t) };
-    }),
-  },
-};
-// The wheel pattern is general workshop practice, not from a licensed source.
-DIAGRAMS.wheel.ref = "general workshop practice";
+const DIAGRAMS = { wheel: wheelStar() };
 
 export function build() {
   return { steps: STEPS, groups: GROUPS, variants: VARIANTS, spec: SPEC, diagrams: DIAGRAMS, figures: buildFigures() };
