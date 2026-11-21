@@ -27,6 +27,12 @@ its own. `site/dist/` is not committed: build it after cloning.
 | `a4-b8-brake-fluid`: brake fluid change, up to 10 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-fluid-check`: check and top up oil, coolant, brake and washer fluid, 5 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-wheel-swap`: wheel swap and tyre check, up to 8 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-air-filter`: engine air filter, 4 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-cabin-filter`: cabin (pollen) filter, 4 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-wipers`: wiper blades, up to 6 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-battery`: battery test and replacement, 7 steps | **Draft** (voltage guide graded from general practice) | Licensed data, not loaded yet |
+| `a4-b8-bulbs`: halogen headlamp bulb, 5 steps; xenon and LED stop at step 1 | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-annual-check`: whole-car inspection checklist, 8 steps | **Draft** | Licensed data, not loaded yet |
 
 A **draft** has the full procedure, but no specs: torques show as "spec not loaded" and
 measurements are recorded without a grade. Nothing in it is a guessed number.
@@ -101,6 +107,9 @@ one of `flange`, `cover`, `bracket`, `pan`, `wheel`; or a column of bearing caps
 | `build.mjs` | Builds the catalogue and every job page into `dist/` |
 | `runtime/game.js`, `runtime/game.css` | The job engine shared by every job |
 | `lib/page.mjs` | Page templates and the build checks |
+| `lib/small-figures.mjs` | Drawings for the small jobs: filter box, wiper, battery, headlamp |
+| `lib/a4b8.mjs` | Shared settings for the A4 B8 draft jobs |
+| `lib/diagrams.mjs` | Shared bolt patterns |
 | `lib/figure.mjs` | Drawing helpers on top of the Anatomy kit (`.claude/skills/anatomy`) |
 | `jobs/<id>/` | One job: `job.mjs`, and usually `figures.mjs` |
 
