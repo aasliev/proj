@@ -14,7 +14,9 @@ node site/build.mjs --public   # leaves out jobs marked private
 node site/build.mjs --dark     # dark theme
 ```
 
-Then open `site/dist/index.html` in a browser. Each page in `site/dist/jobs/` also works on
+Then open `site/dist/index.html` in a browser. The catalogue filters by car, system, difficulty,
+time and whether specs are loaded, plus a text search. The filters are kept in the address
+(for example `index.html#system=Brakes&time=120`), so a filtered view can be bookmarked or shared. Each page in `site/dist/jobs/` also works on
 its own. `site/dist/` is not committed: build it after cloning.
 
 ## Jobs
@@ -46,7 +48,7 @@ never publish a build that includes it.
    - `meta`: `id` (same as the folder name), `title`, `vehicle` `{make, model, generation, years}`,
      optional `engine`, `system` (Brakes, Engine, ...), `vehicleLine`, `status` (`draft` or
      `ready`), `private`, `minutes`, `difficulty`, `summary`,
-     `source` `{name, prefix}` (prefix goes before each step's `ref`), optional `draftNote`,
+     `source` `{name, prefix}` (prefix goes before each step's `ref`), optional `draftNote`, `statusLabel` (replaces "Draft · specs not loaded" on the card),
      `legal` and `storageKey`.
    - `build()`, returning `{steps, groups, variants, spec, diagrams, figures}`.
 2. Draw its figures in a `figures.mjs` with the helpers in `lib/figure.mjs`. Every part sits in

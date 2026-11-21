@@ -51,22 +51,60 @@ export function jobPage(meta, data, { theme = "light", back = "" } = {}) {
   return k.pageHtml({ title: meta.title, theme, body: `<style>${CSS}</style>${body}`, script: GAME, width: 1180 });
 }
 
-// The catalogue: jobs grouped by vehicle, then by system.
+// The catalogue: jobs grouped by vehicle, with filters for system, difficulty, time, status
+// and a text search. Filters live in the URL hash, so a filtered view can be bookmarked or shared.
+const LEVELS = [["beginner", "Beginner"], ["intermediate", "Intermediate"], ["expert", "Expert"]];
+const TIMES = [["any", "Any time"], ["30", "Up to 30 min"], ["120", "Up to 2 h"], ["long", "Longer"]];
+const levelsOf = (difficulty) => LEVELS.map(([id]) => id).filter((id) => difficulty.toLowerCase().includes(id));
+const carOf = (v) => `${v.make} ${v.model}${v.generation ? ` (${v.generation})` : ""}`;
+
 export function cataloguePage(jobs, { theme = "light", title = "Car fixes" } = {}) {
   const byCar = new Map();
-  for (const { meta, href, steps } of jobs) {
-    const v = meta.vehicle;
-    const car = `${v.make} ${v.model}${v.generation ? ` (${v.generation})` : ""}`;
+  for (const job of jobs) {
+    const car = carOf(job.meta.vehicle);
     if (!byCar.has(car)) byCar.set(car, []);
-    byCar.get(car).push({ meta, href, steps });
+    byCar.get(car).push(job);
   }
   const time = (m) => (m >= 120 ? `${Math.round(m / 60)} h` : `${m} min`);
-  const cars = [...byCar].sort(([a], [b]) => a.localeCompare(b)).map(([car, list]) => `<section class="cat-car"><h2>${esc(car)}</h2><ul class="cat-jobs">${list.sort((a, b) => a.meta.system.localeCompare(b.meta.system) || a.meta.title.localeCompare(b.meta.title)).map(({ meta, href, steps }) => `<li><a class="cat-job" href="${esc(href)}"><span class="cat-meta">${esc(meta.system)}${meta.engine ? ` · ${esc(meta.engine)}` : ""}</span><strong>${esc(meta.title)}</strong><span class="cat-sum">${esc(meta.summary)}</span><span class="cat-tags">${meta.status === "draft" ? `<span class="cat-tag" data-draft>Draft · specs not loaded</span>` : `<span class="cat-tag">Specs loaded</span>`}<span class="cat-tag">${steps} steps</span><span class="cat-tag">about ${time(meta.minutes)}</span><span class="cat-tag">${esc(meta.difficulty)}</span>${meta.private ? `<span class="cat-tag" data-private>Private</span>` : ""}</span></a></li>`).join("")}</ul></section>`).join("");
+  const count = (pick) => (value) => jobs.filter((j) => pick(j).includes(value)).length;
+  const systems = [...new Set(jobs.map((j) => j.meta.system))].sort();
+  const cars = [...byCar.keys()].sort();
+
+  const card = ({ meta, href, steps }) => {
+    const text = [meta.title, meta.summary, meta.system, meta.engine || "", meta.vehicleLine].join(" ").toLowerCase();
+    const status = meta.status === "draft" ? `<span class="cat-tag" data-draft>${esc(meta.statusLabel || "Draft · specs not loaded")}</span>` : `<span class="cat-tag">Specs loaded</span>`;
+    return `<li data-job data-system="${esc(meta.system)}" data-car="${esc(carOf(meta.vehicle))}" data-levels="${levelsOf(meta.difficulty).join(" ")}" data-minutes="${meta.minutes}" data-status="${meta.status}" data-text="${esc(text)}"><a class="cat-job" href="${esc(href)}"><span class="cat-meta">${esc(meta.system)}${meta.engine ? ` · ${esc(meta.engine)}` : ""}</span><strong>${esc(meta.title)}</strong><span class="cat-sum">${esc(meta.summary)}</span><span class="cat-tags">${status}<span class="cat-tag">${steps} steps</span><span class="cat-tag">about ${time(meta.minutes)}</span><span class="cat-tag">${esc(meta.difficulty)}</span>${meta.private ? `<span class="cat-tag" data-private>Private</span>` : ""}</span></a></li>`;
+  };
+  const sections = cars.map((car) => `<section class="cat-car" data-car-section="${esc(car)}"><h2>${esc(car)}</h2><ul class="cat-jobs">${byCar.get(car).sort((a, b) => a.meta.system.localeCompare(b.meta.system) || a.meta.title.localeCompare(b.meta.title)).map(card).join("")}</ul></section>`).join("");
+
+  const chips = (group, items, multi = true) => `<div class="cat-chips" role="group" aria-label="${esc(group.label)}" data-group="${group.id}" data-multi="${multi ? 1 : 0}"><span class="cat-label">${esc(group.label)}</span>${items.map(([id, label, n]) => `<button type="button" class="cat-chip" data-value="${esc(id)}" aria-pressed="false">${esc(label)}${n !== undefined ? ` <span class="cat-n">${n}</span>` : ""}</button>`).join("")}</div>`;
+  const filters = jobs.length ? `<div class="cat-filters">
+  <label class="cat-search"><span class="cat-label">Search</span><input type="search" data-search placeholder="oil, brakes, battery…" autocomplete="off"></label>
+  ${cars.length > 1 ? chips({ id: "car", label: "Car" }, cars.map((c) => [c, c, count((j) => [carOf(j.meta.vehicle)])(c)])) : ""}
+  ${chips({ id: "system", label: "System" }, systems.map((x) => [x, x, count((j) => [j.meta.system])(x)]))}
+  ${chips({ id: "level", label: "Difficulty" }, LEVELS.map(([id, label]) => [id, label, count((j) => levelsOf(j.meta.difficulty))(id)]))}
+  ${chips({ id: "time", label: "Time" }, TIMES.map(([id, label]) => [id, label]), false)}
+  ${chips({ id: "status", label: "Specs" }, [["ready", "Specs loaded", count((j) => [j.meta.status])("ready")], ["draft", "Drafts", count((j) => [j.meta.status])("draft")]])}
+  <p class="cat-result"><span data-result aria-live="polite"></span> <button type="button" class="cat-clear" data-clear hidden>Clear filters</button></p>
+</div>` : "";
+
   const css = `
 .cat h1{font:600 26px/1.2 ui-sans-serif,system-ui,sans-serif;color:var(--anatomy-strong);margin:0 0 6px}
-.cat-lede{color:var(--anatomy-text);max-width:60ch;margin:0 0 28px;line-height:1.55}
+.cat-lede{color:var(--anatomy-text);max-width:60ch;margin:0 0 22px;line-height:1.55}
+.cat-filters{display:grid;gap:10px;padding:14px 16px;border:1px solid var(--anatomy-faint);border-radius:10px;background:var(--anatomy-card);margin-bottom:8px}
+.cat-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.cat-label{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted);min-width:88px}
+.cat-chip{font:12px/1 ui-sans-serif,system-ui,sans-serif;padding:7px 10px;border-radius:999px;border:1px solid var(--anatomy-faint);background:none;color:var(--anatomy-text);cursor:pointer}
+.cat-chip:hover{border-color:var(--anatomy-muted)}
+.cat-chip[aria-pressed="true"]{background:var(--anatomy-strong);border-color:var(--anatomy-strong);color:var(--anatomy-page)}
+.cat-chip:focus-visible,.cat-clear:focus-visible,.cat-search input:focus-visible{outline:2px solid var(--anatomy-strong);outline-offset:2px}
+.cat-n{font:10px var(--anatomy-mono);opacity:.7;margin-left:2px}
+.cat-search{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.cat-search input{flex:1;min-width:0;width:100%;max-width:360px;font:14px ui-sans-serif,system-ui,sans-serif;padding:8px 10px;border-radius:7px;border:1px solid var(--anatomy-faint);background:var(--anatomy-page);color:var(--anatomy-strong)}
+.cat-result{margin:2px 0 0;font:12px var(--anatomy-mono);color:var(--anatomy-muted)}
+.cat-clear{font:12px var(--anatomy-mono);background:none;border:0;padding:0 0 0 8px;color:var(--anatomy-strong);text-decoration:underline;cursor:pointer}
 .cat-car h2{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted);margin:24px 0 10px}
-.cat-jobs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.cat-jobs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:12px}
 .cat-job{display:flex;flex-direction:column;gap:6px;height:100%;padding:16px;border:1px solid var(--anatomy-faint);border-radius:10px;background:var(--anatomy-card);color:var(--anatomy-text);text-decoration:none;transition:border-color .2s}
 .cat-job:hover,.cat-job:focus-visible{border-color:var(--anatomy-strong)}
 .cat-job strong{font:600 16px/1.3 ui-sans-serif,system-ui,sans-serif;color:var(--anatomy-strong)}
@@ -76,7 +114,82 @@ export function cataloguePage(jobs, { theme = "light", title = "Car fixes" } = {
 .cat-tag{font:11px/1 var(--anatomy-mono);padding:5px 7px;border-radius:5px;border:1px solid var(--anatomy-faint);color:var(--anatomy-muted)}
 .cat-tag[data-draft]{border-color:#a8691b;color:#a8691b}
 .cat-tag[data-private]{border-color:var(--anatomy-strong);color:var(--anatomy-strong)}
-.cat-foot{margin-top:36px;font-size:12px;color:var(--anatomy-muted);line-height:1.5;max-width:70ch}`;
-  const body = `<div class="cat"><h1>${esc(title)}</h1><p class="cat-lede">Step-by-step trainers for car repairs. Practise a job on screen first, with the torques, sequences and checks quizzed, then take the Garage checklist to the car.</p>${cars || "<p>No jobs in this build.</p>"}<p class="cat-foot">Always check values against the source each job names. Jobs marked Draft have the procedure but no specs loaded yet.</p></div>`;
-  return k.pageHtml({ title, theme, body: `<style>${css}</style>${body}`, width: 1000 });
+.cat-empty{padding:28px 0;color:var(--anatomy-muted)}
+.cat-foot{margin-top:36px;font-size:12px;color:var(--anatomy-muted);line-height:1.5;max-width:70ch}
+@media (max-width:600px){.cat-label{min-width:100%}}`;
+
+  const script = `
+const root = document.querySelector(".cat");
+const cards = [...root.querySelectorAll("[data-job]")];
+const search = root.querySelector("[data-search]");
+const result = root.querySelector("[data-result]");
+const clear = root.querySelector("[data-clear]");
+const empty = root.querySelector("[data-empty]");
+// State: a set of picked values per chip group, plus the search text. Empty set = no filter.
+const state = { car: new Set(), system: new Set(), level: new Set(), time: new Set(), status: new Set(), q: "" };
+function read() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  for (const key of ["car", "system", "level", "time", "status"]) state[key] = new Set((params.get(key) || "").split(",").filter(Boolean));
+  state.q = params.get("q") || "";
+}
+function write() {
+  const params = new URLSearchParams();
+  for (const key of ["car", "system", "level", "time", "status"]) if (state[key].size) params.set(key, [...state[key]].join(","));
+  if (state.q) params.set("q", state.q);
+  const hash = params.toString();
+  history.replaceState(null, "", hash ? "#" + hash : location.pathname + location.search);
+}
+const timeOk = (minutes) => {
+  const t = [...state.time][0];
+  if (!t || t === "any") return true;
+  return t === "long" ? minutes > 120 : minutes <= Number(t);
+};
+function apply() {
+  const words = state.q.toLowerCase().split(/\\s+/).filter(Boolean);
+  let shown = 0;
+  for (const li of cards) {
+    const d = li.dataset;
+    const ok = (!state.car.size || state.car.has(d.car))
+      && (!state.system.size || state.system.has(d.system))
+      && (!state.level.size || d.levels.split(" ").some((l) => state.level.has(l)))
+      && timeOk(Number(d.minutes))
+      && (!state.status.size || state.status.has(d.status))
+      && words.every((w) => d.text.includes(w));
+    li.hidden = !ok;
+    if (ok) shown++;
+  }
+  for (const section of root.querySelectorAll("[data-car-section]")) section.hidden = !section.querySelector("[data-job]:not([hidden])");
+  for (const group of root.querySelectorAll("[data-group]")) {
+    for (const chip of group.querySelectorAll("[data-value]")) {
+      const picked = group.dataset.group === "time" ? (state.time.size ? state.time.has(chip.dataset.value) : chip.dataset.value === "any") : state[group.dataset.group].has(chip.dataset.value);
+      chip.setAttribute("aria-pressed", String(picked));
+    }
+  }
+  const filtered = state.q || ["car", "system", "level", "time", "status"].some((k) => state[k].size && !(k === "time" && state.time.has("any")));
+  result.textContent = filtered ? (shown === 1 ? "1 job matches" : shown + " jobs match") : cards.length + " jobs";
+  clear.hidden = !filtered;
+  empty.hidden = shown > 0;
+  if (search.value !== state.q) search.value = state.q;
+}
+root.addEventListener("click", (event) => {
+  const chip = event.target.closest("[data-value]");
+  if (chip) {
+    const group = chip.closest("[data-group]");
+    const set = state[group.dataset.group];
+    const value = chip.dataset.value;
+    if (group.dataset.multi === "1") set.has(value) ? set.delete(value) : set.add(value);
+    else { set.clear(); if (value !== "any") set.add(value); }
+    write(); apply();
+  }
+  if (event.target.closest("[data-clear]")) {
+    for (const key of ["car", "system", "level", "time", "status"]) state[key].clear();
+    state.q = ""; write(); apply(); search.focus();
+  }
+});
+search.addEventListener("input", () => { state.q = search.value.trim(); write(); apply(); });
+window.addEventListener("hashchange", () => { read(); apply(); });
+read(); apply();`;
+
+  const body = `<div class="cat"><h1>${esc(title)}</h1><p class="cat-lede">Step-by-step trainers for car repairs. Practise a job on screen first, with the torques, sequences and checks quizzed, then take the Garage checklist to the car.</p>${filters}${sections || "<p>No jobs in this build.</p>"}<p class="cat-empty" data-empty hidden>No jobs match these filters. <button type="button" class="cat-clear" data-clear>Clear filters</button></p><p class="cat-foot">Always check values against the source each job names. Jobs marked Draft have the procedure but no specs loaded yet.</p></div>`;
+  return k.pageHtml({ title, theme, body: `<style>${css}</style>${body}`, script: jobs.length ? script : "", width: 1000 });
 }

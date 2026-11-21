@@ -8,6 +8,7 @@ export const meta = draftMeta({
   title: "Battery test and replacement",
   system: "Body and electrics",
   minutes: 45,
+  statusLabel: "Draft · voltage guide only",
   difficulty: "Beginner–intermediate",
   summary: "Test the battery's resting voltage, then swap it safely: negative off first and on last, the right battery type, and the new battery registered with the car.",
   draftNote: "The procedure is general workshop practice, and the voltage guide is general for 12 V lead-acid batteries. No licensed data is loaded yet, so the battery location, type, terminal torques and the registration procedure show as “spec not loaded”.",
