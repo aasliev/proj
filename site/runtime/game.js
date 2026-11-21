@@ -47,6 +47,10 @@ function specText(spec) {
   const u = spec.unit || "mm";
   if (spec.pending) return spec.why ? `spec: ${spec.why}` : "spec not loaded yet";
   if (spec.nominal) return `${fmt(spec.nominal)} ${u} ± ${fmt(spec.dev)} ${u}`;
+  // Only a minimum, e.g. a thermostat's opening lift.
+  if (spec.max === undefined) return `min ${fmt(spec.min)} ${u}`;
+  // A wear limit below the new range, e.g. compression pressure.
+  if (spec.lowLimit !== undefined) return `new ${fmt(spec.min)}–${fmt(spec.max)} ${u} · wear limit ${fmt(spec.lowLimit)} ${u} minimum`;
   if (spec.limit === undefined) return spec.min === 0 ? `max ${fmt(spec.max)} ${u}` : `${fmt(spec.min)}–${fmt(spec.max)} ${u}`;
   return `new ${fmt(spec.min)}–${fmt(spec.max)} ${u} · wear limit ${fmt(spec.limit)} ${u}`;
 }
@@ -54,8 +58,9 @@ function grade(spec, value) {
   if (!Number.isFinite(value)) return null;
   if (spec.pending) return "unchecked";
   if (spec.nominal) return Math.abs(value - spec.nominal) <= spec.dev + 1e-9 ? "ok" : "bad";
+  if (spec.max === undefined) return value >= spec.min - 1e-9 ? "ok" : "low";
   if (value >= spec.min - 1e-9 && value <= spec.max + 1e-9) return "ok";
-  if (value < spec.min) return "low";
+  if (value < spec.min) return spec.lowLimit === undefined ? "low" : value >= spec.lowLimit - 1e-9 ? "worn" : "bad";
   return spec.limit !== undefined && value <= spec.limit + 1e-9 ? "worn" : "bad";
 }
 const GRADE = { ok: "in spec", worn: "past new spec, within wear limit", low: "below spec", bad: "out of limit: replace or repair", unchecked: "recorded, not graded" };
@@ -352,6 +357,8 @@ root.addEventListener("click", (event) => {
       const roll = Math.random();
       let v;
       if (spec.nominal) v = spec.nominal + (roll < 0.9 ? (Math.random() * 2 - 1) * spec.dev * 0.7 : spec.dev * (1.2 + Math.random() * 0.5));
+      else if (spec.max === undefined) v = roll < 0.85 ? spec.min * (1 + Math.random() * 0.3) : spec.min * (0.6 + Math.random() * 0.3);
+      else if (spec.lowLimit !== undefined) v = roll < 0.8 ? spec.min + Math.random() * (spec.max - spec.min) : roll < 0.95 ? spec.lowLimit + Math.random() * (spec.min - spec.lowLimit) : spec.lowLimit * (0.75 + Math.random() * 0.2);
       else if (spec.limit === undefined) v = roll < 0.85 ? spec.min + Math.random() * (spec.max - spec.min) : spec.max + (spec.max - spec.min) * (0.5 + Math.random());
       else v = roll < 0.8 ? spec.min + Math.random() * (spec.max - spec.min) : roll < 0.95 ? spec.max + Math.random() * (spec.limit - spec.max) : spec.limit * (1.05 + Math.random() * 0.2);
       S.values[`${k}.${i}`] = Number(v.toFixed(3));

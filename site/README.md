@@ -40,6 +40,10 @@ its own. `site/dist/` is not committed: build it after cloning.
 | `a4-b8-aux-belt`: auxiliary belt check and replacement, 5 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-jump-start`: jump start from a car or a jump pack, 6 steps | **Draft** | General practice and the owner's manual |
 | `a4-b8-flat-tire`: spare wheel or repair kit at the roadside, up to 5 steps | **Draft** | Licensed data, not loaded yet |
+| `ea888-timing-chain-check`: valve timing check for chain stretch or a jumped tooth, 6 steps | Ready, **private**, common problem | Audi repair manual, Rep. Gr. 15 |
+| `ea888-coolant-pump-leak`: pressure test, coolant pump and thermostat replacement, 9 steps | Ready, **private**, common problem | Audi repair manual, Rep. Gr. 19 |
+| `ea888-pcv-oil-separator`: crankcase breather test and replacement, 3 steps | Ready, **private**, common problem | Audi repair manual, Rep. Gr. 17 |
+| `ea888-compression-oil-pressure`: oil use, compression and oil pressure tests, 5 steps | Ready, **private**, common problem | Audi repair manual, Rep. Gr. 15 and 17 |
 
 A **draft** has the full procedure, but no specs: torques show as "spec not loaded" and
 measurements are recorded without a grade. Nothing in it is a guessed number.
@@ -53,7 +57,7 @@ never publish a build that includes it.
    - `meta`: `id` (same as the folder name), `title`, `vehicle` `{make, model, generation, years}`,
      optional `engine`, `system` (Brakes, Engine, ...), `vehicleLine`, `status` (`draft` or
      `ready`), `private`, `minutes`, `difficulty`, `summary`,
-     `source` `{name, prefix}` (prefix goes before each step's `ref`), optional `draftNote`, `statusLabel` (replaces "Draft · specs not loaded" on the card),
+     `source` `{name, prefix}` (prefix goes before each step's `ref`), optional `commonProblem` (shows a "Common problem" label and puts the job under the Type filter), `draftNote`, `statusLabel` (replaces "Draft · specs not loaded" on the card),
      `legal` and `storageKey`.
    - `build()`, returning `{steps, groups, variants, spec, diagrams, figures}`.
 2. Draw its figures in a `figures.mjs` with the helpers in `lib/figure.mjs`. Every part sits in
@@ -98,7 +102,8 @@ Task types:
 
 Any task can have its own `when`.
 
-Specs: `{nominal, dev}`, `{min, max, limit}` (new range and wear limit), or `{min, max}`, each with
+Specs: `{nominal, dev}`, `{min, max, limit}` (new range and wear limit above it), `{min, max, lowLimit}`
+(wear limit below it, such as compression), `{min, max}`, or `{min}` alone, each with
 `unit` and `ref`. A spec that depends on a version uses
 `{unit, ref, byVariant: {key, values: {<option id>: {min, max, ...}}}}`. A `spec` id missing
 from the table counts as not loaded: readings are recorded but not graded.

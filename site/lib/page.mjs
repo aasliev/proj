@@ -71,9 +71,9 @@ export function catalogPage(jobs, { theme = "light", title = "Car fixes" } = {})
   const cars = [...byCar.keys()].sort();
 
   const card = ({ meta, href, steps }) => {
-    const text = [meta.title, meta.summary, meta.system, meta.engine || "", meta.vehicleLine].join(" ").toLowerCase();
+    const text = [meta.title, meta.summary, meta.system, meta.engine || "", meta.vehicleLine, meta.commonProblem || ""].join(" ").toLowerCase();
     const status = meta.status === "draft" ? `<span class="cat-tag" data-draft>${esc(meta.statusLabel || "Draft · specs not loaded")}</span>` : `<span class="cat-tag">Specs loaded</span>`;
-    return `<li data-job data-system="${esc(meta.system)}" data-car="${esc(carOf(meta.vehicle))}" data-levels="${levelsOf(meta.difficulty).join(" ")}" data-minutes="${meta.minutes}" data-status="${meta.status}" data-text="${esc(text)}"><a class="cat-job" href="${esc(href)}"><span class="cat-meta">${esc(meta.system)}${meta.engine ? ` · ${esc(meta.engine)}` : ""}</span><strong>${esc(meta.title)}</strong><span class="cat-sum">${esc(meta.summary)}</span><span class="cat-tags">${status}<span class="cat-tag">${steps} steps</span><span class="cat-tag">about ${time(meta.minutes)}</span><span class="cat-tag">${esc(meta.difficulty)}</span>${meta.private ? `<span class="cat-tag" data-private>Private</span>` : ""}</span></a></li>`;
+    return `<li data-job data-system="${esc(meta.system)}" data-car="${esc(carOf(meta.vehicle))}" data-levels="${levelsOf(meta.difficulty).join(" ")}" data-minutes="${meta.minutes}" data-status="${meta.status}" data-type="${meta.commonProblem ? "problem" : ""}" data-text="${esc(text)}"><a class="cat-job" href="${esc(href)}"><span class="cat-meta">${esc(meta.system)}${meta.engine ? ` · ${esc(meta.engine)}` : ""}</span>${meta.commonProblem ? `<span class="cat-problem">Common problem: ${esc(meta.commonProblem)}</span>` : ""}<strong>${esc(meta.title)}</strong><span class="cat-sum">${esc(meta.summary)}</span><span class="cat-tags">${status}<span class="cat-tag">${steps} steps</span><span class="cat-tag">about ${time(meta.minutes)}</span><span class="cat-tag">${esc(meta.difficulty)}</span>${meta.private ? `<span class="cat-tag" data-private>Private</span>` : ""}</span></a></li>`;
   };
   const sections = cars.map((car) => `<section class="cat-car" data-car-section="${esc(car)}"><h2>${esc(car)}</h2><ul class="cat-jobs">${byCar.get(car).sort((a, b) => a.meta.system.localeCompare(b.meta.system) || a.meta.title.localeCompare(b.meta.title)).map(card).join("")}</ul></section>`).join("");
 
@@ -81,6 +81,7 @@ export function catalogPage(jobs, { theme = "light", title = "Car fixes" } = {})
   const filters = jobs.length ? `<div class="cat-filters">
   <label class="cat-search"><span class="cat-label">Search</span><input type="search" data-search placeholder="oil, brakes, battery…" autocomplete="off"></label>
   ${cars.length > 1 ? chips({ id: "car", label: "Car" }, cars.map((c) => [c, c, count((j) => [carOf(j.meta.vehicle)])(c)])) : ""}
+  ${jobs.some((j) => j.meta.commonProblem) ? chips({ id: "type", label: "Type" }, [["problem", "Common problems", jobs.filter((j) => j.meta.commonProblem).length]]) : ""}
   ${chips({ id: "system", label: "System" }, systems.map((x) => [x, x, count((j) => [j.meta.system])(x)]))}
   ${chips({ id: "level", label: "Difficulty" }, LEVELS.map(([id, label]) => [id, label, count((j) => levelsOf(j.meta.difficulty))(id)]))}
   ${chips({ id: "time", label: "Time" }, TIMES.map(([id, label]) => [id, label]), false)}
@@ -110,6 +111,7 @@ export function catalogPage(jobs, { theme = "light", title = "Car fixes" } = {})
 .cat-job strong{font:600 16px/1.3 ui-sans-serif,system-ui,sans-serif;color:var(--anatomy-strong)}
 .cat-meta{font:11px/1.4 var(--anatomy-mono);color:var(--anatomy-muted)}
 .cat-sum{line-height:1.5;font-size:13px}
+.cat-problem{align-self:flex-start;font:11px/1.3 var(--anatomy-mono);padding:4px 7px;border-radius:5px;background:var(--anatomy-faint);color:var(--anatomy-strong)}
 .cat-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:6px}
 .cat-tag{font:11px/1 var(--anatomy-mono);padding:5px 7px;border-radius:5px;border:1px solid var(--anatomy-faint);color:var(--anatomy-muted)}
 .cat-tag[data-draft]{border-color:#a8691b;color:#a8691b}
@@ -126,15 +128,15 @@ const result = root.querySelector("[data-result]");
 const clear = root.querySelector("[data-clear]");
 const empty = root.querySelector("[data-empty]");
 // State: a set of picked values per chip group, plus the search text. Empty set = no filter.
-const state = { car: new Set(), system: new Set(), level: new Set(), time: new Set(), status: new Set(), q: "" };
+const state = { type: new Set(), car: new Set(), system: new Set(), level: new Set(), time: new Set(), status: new Set(), q: "" };
 function read() {
   const params = new URLSearchParams(location.hash.slice(1));
-  for (const key of ["car", "system", "level", "time", "status"]) state[key] = new Set((params.get(key) || "").split(",").filter(Boolean));
+  for (const key of ["type", "car", "system", "level", "time", "status"]) state[key] = new Set((params.get(key) || "").split(",").filter(Boolean));
   state.q = params.get("q") || "";
 }
 function write() {
   const params = new URLSearchParams();
-  for (const key of ["car", "system", "level", "time", "status"]) if (state[key].size) params.set(key, [...state[key]].join(","));
+  for (const key of ["type", "car", "system", "level", "time", "status"]) if (state[key].size) params.set(key, [...state[key]].join(","));
   if (state.q) params.set("q", state.q);
   const hash = params.toString();
   history.replaceState(null, "", hash ? "#" + hash : location.pathname + location.search);
@@ -149,7 +151,8 @@ function apply() {
   let shown = 0;
   for (const li of cards) {
     const d = li.dataset;
-    const ok = (!state.car.size || state.car.has(d.car))
+    const ok = (!state.type.size || state.type.has(d.type))
+      && (!state.car.size || state.car.has(d.car))
       && (!state.system.size || state.system.has(d.system))
       && (!state.level.size || d.levels.split(" ").some((l) => state.level.has(l)))
       && timeOk(Number(d.minutes))
@@ -165,7 +168,7 @@ function apply() {
       chip.setAttribute("aria-pressed", String(picked));
     }
   }
-  const filtered = state.q || ["car", "system", "level", "time", "status"].some((k) => state[k].size && !(k === "time" && state.time.has("any")));
+  const filtered = state.q || ["type", "car", "system", "level", "time", "status"].some((k) => state[k].size && !(k === "time" && state.time.has("any")));
   result.textContent = filtered ? (shown === 1 ? "1 job matches" : shown + " jobs match") : cards.length + " jobs";
   clear.hidden = !filtered;
   empty.hidden = shown > 0;
@@ -182,7 +185,7 @@ root.addEventListener("click", (event) => {
     write(); apply();
   }
   if (event.target.closest("[data-clear]")) {
-    for (const key of ["car", "system", "level", "time", "status"]) state[key].clear();
+    for (const key of ["type", "car", "system", "level", "time", "status"]) state[key].clear();
     state.q = ""; write(); apply(); search.focus();
   }
 });
