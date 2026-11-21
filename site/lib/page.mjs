@@ -58,7 +58,7 @@ const TIMES = [["any", "Any time"], ["30", "Up to 30 min"], ["120", "Up to 2 h"]
 const levelsOf = (difficulty) => LEVELS.map(([id]) => id).filter((id) => difficulty.toLowerCase().includes(id));
 const carOf = (v) => `${v.make} ${v.model}${v.generation ? ` (${v.generation})` : ""}`;
 
-export function catalogPage(jobs, { theme = "light", title = "Car fixes" } = {}) {
+export function catalogPage(jobs, { theme = "light", title = "Car fixes", symptoms = false } = {}) {
   const byCar = new Map();
   for (const job of jobs) {
     const car = carOf(job.meta.vehicle);
@@ -92,6 +92,8 @@ export function catalogPage(jobs, { theme = "light", title = "Car fixes" } = {})
   const css = `
 .cat h1{font:600 26px/1.2 ui-sans-serif,system-ui,sans-serif;color:var(--anatomy-strong);margin:0 0 6px}
 .cat-lede{color:var(--anatomy-text);max-width:60ch;margin:0 0 22px;line-height:1.55}
+.cat-links{margin:-8px 0 18px}
+.cat-links a{font-weight:600;color:var(--anatomy-strong)}
 .cat-filters{display:grid;gap:10px;padding:14px 16px;border:1px solid var(--anatomy-faint);border-radius:10px;background:var(--anatomy-card);margin-bottom:8px}
 .cat-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .cat-label{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted);min-width:88px}
@@ -193,6 +195,62 @@ search.addEventListener("input", () => { state.q = search.value.trim(); write();
 window.addEventListener("hashchange", () => { read(); apply(); });
 read(); apply();`;
 
-  const body = `<div class="cat"><h1>${esc(title)}</h1><p class="cat-lede">Step-by-step trainers for car repairs. Practice a job on screen first, with the torques, sequences and checks quizzed, then take the Garage checklist to the car.</p>${filters}${sections || "<p>No jobs in this build.</p>"}<p class="cat-empty" data-empty hidden>No jobs match these filters. <button type="button" class="cat-clear" data-clear>Clear filters</button></p><p class="cat-foot">Always check values against the source each job names. Jobs marked Draft have the procedure but no specs loaded yet.</p></div>`;
+  const body = `<div class="cat"><h1>${esc(title)}</h1><p class="cat-lede">Step-by-step trainers for car repairs. Practice a job on screen first, with the torques, sequences and checks quizzed, then take the Garage checklist to the car.</p>${symptoms ? `<p class="cat-links"><a href="symptoms.html">Something wrong with the car? Start from the symptom →</a></p>` : ""}${filters}${sections || "<p>No jobs in this build.</p>"}<p class="cat-empty" data-empty hidden>No jobs match these filters. <button type="button" class="cat-clear" data-clear>Clear filters</button></p><p class="cat-foot">Always check values against the source each job names. Jobs marked Draft have the procedure but no specs loaded yet.</p></div>`;
   return k.pageHtml({ title, theme, body: `<style>${css}</style>${body}`, script: jobs.length ? script : "", width: 1000 });
+}
+
+// The symptom guide: symptom → checks first → likely causes → links to the jobs in this build.
+export function symptomsPage(symptoms, areas, jobs, { theme = "light" } = {}) {
+  const byId = new Map(jobs.map((j) => [j.meta.id, j]));
+  const link = (id) => (byId.has(id) ? `<a class="sy-job" href="${esc(byId.get(id).href)}">${esc(byId.get(id).meta.title)}</a>` : "");
+  const card = (s) => {
+    const causes = s.causes.map((c) => {
+      const links = c.jobs.map(link).filter(Boolean);
+      return `<li>${esc(c.text)}${links.length ? `<span class="sy-jobs">${links.join("")}</span>` : ""}</li>`;
+    }).join("");
+    const text = [s.symptom, ...s.first, ...s.causes.map((c) => c.text)].join(" ").toLowerCase();
+    return `<article class="sy-card" id="${esc(s.id)}" data-sy data-text="${esc(text)}" ${s.stop ? "data-stop" : ""}>
+  <h3>${esc(s.symptom)}</h3>
+  ${s.stop ? `<p class="sy-stop">Stop driving until this is checked.</p>` : ""}
+  <p class="sy-label">Check first</p><ul class="sy-first">${s.first.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+  <p class="sy-label">Likely causes</p><ul class="sy-causes">${causes}</ul>
+</article>`;
+  };
+  const sections = areas.map((area) => {
+    const list = symptoms.filter((s) => s.area === area);
+    return list.length ? `<section class="sy-area" data-area><h2>${esc(area)}</h2>${list.map(card).join("")}</section>` : "";
+  }).join("");
+  const css = `
+.sy h1{font:600 26px/1.2 ui-sans-serif,system-ui,sans-serif;color:var(--anatomy-strong);margin:0 0 6px}
+.sy-back{font:12px var(--anatomy-mono);color:var(--anatomy-muted);text-decoration:none}
+.sy-lede{color:var(--anatomy-text);max-width:62ch;line-height:1.55;margin:0 0 18px}
+.sy-search{display:block;width:100%;max-width:420px;font:15px ui-sans-serif,system-ui,sans-serif;padding:10px 12px;border-radius:8px;border:1px solid var(--anatomy-faint);background:var(--anatomy-card);color:var(--anatomy-strong);margin-bottom:8px}
+.sy-search:focus-visible{outline:2px solid var(--anatomy-strong);outline-offset:2px}
+.sy-area h2{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted);margin:26px 0 10px}
+.sy-card{border:1px solid var(--anatomy-faint);border-radius:10px;background:var(--anatomy-card);padding:14px 16px;margin-bottom:10px}
+.sy-card[data-stop]{border-color:#b3412d}
+.sy-card h3{font:600 16px/1.35 ui-sans-serif,system-ui,sans-serif;color:var(--anatomy-strong);margin:0 0 6px}
+.sy-stop{margin:0 0 8px;font-weight:600;color:#b3412d}
+.iso[data-theme="dark"] .sy-stop{color:#ff7b6b}
+.sy-label{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted);margin:10px 0 4px}
+.sy-card ul{margin:0;padding-left:18px;line-height:1.5}
+.sy-causes li{margin-bottom:6px}
+.sy-jobs{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.sy-job{font:12px/1 var(--anatomy-mono);padding:6px 8px;border-radius:6px;border:1px solid var(--anatomy-strong);color:var(--anatomy-strong);text-decoration:none}
+.sy-job:hover,.sy-job:focus-visible{background:var(--anatomy-strong);color:var(--anatomy-page)}
+.sy-none{color:var(--anatomy-muted)}
+.sy-foot{margin-top:30px;font-size:12px;color:var(--anatomy-muted);line-height:1.5;max-width:70ch}`;
+  const script = `
+const q = document.querySelector("[data-q]");
+const none = document.querySelector("[data-none]");
+function apply() {
+  const words = q.value.toLowerCase().split(/\\s+/).filter(Boolean);
+  let shown = 0;
+  for (const card of document.querySelectorAll("[data-sy]")) { const ok = words.every((w) => card.dataset.text.includes(w)); card.hidden = !ok; if (ok) shown++; }
+  for (const area of document.querySelectorAll("[data-area]")) area.hidden = !area.querySelector("[data-sy]:not([hidden])");
+  none.hidden = shown > 0;
+}
+q.addEventListener("input", apply);`;
+  const body = `<div class="sy"><p><a class="sy-back" href="index.html">← All jobs</a></p><h1>Diagnose by symptom</h1><p class="sy-lede">Find what you notice, check the simple things first, then go to the job for each likely cause. These are common causes for the Audi A4 (B8) 2.0 TFSI, not a diagnosis: read the fault codes and check before you replace parts.</p><input type="search" class="sy-search" data-q placeholder="noise, brakes, warning light…" aria-label="Search symptoms">${sections}<p class="sy-none" data-none hidden>No symptoms match.</p><p class="sy-foot">Red cards mean stop driving until it's checked. Some causes link to no job yet.</p></div>`;
+  return k.pageHtml({ title: "Diagnose by symptom", theme, body: `<style>${css}</style>${body}`, script, width: 820 });
 }

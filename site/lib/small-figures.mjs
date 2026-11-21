@@ -95,3 +95,44 @@ export function beltDrive() {
   void F; void Z;
   return f.svg();
 }
+
+// A front corner's suspension, wheel removed: the wheel bearing housing (knuckle), two upper
+// and two lower control arms, the shock absorber strut with its spring, and the anti-roll bar
+// with its link. Generic proportions, not measured from a B8.
+export function suspension() {
+  const f = figure({ id: "suspension", label: "A front suspension corner with the wheel off: the wheel bearing housing, two upper and two lower control arms, the shock absorber with its coil spring, and the anti-roll bar with its link.", fit: [[-260, -170, -60], [40, -170, -60], [-260, 170, 320], [40, 170, 320]], azimuth: 28, elevation: 16, width: 560, height: 460 });
+  const { P } = f;
+  const rod = (points, r, tone) => tubePieces(points, r, P, { maxLength: 400, spacing: 1.5 }).map((piece) => tubeSvg(piece, { tone })).join("");
+  const joint = ([x, y, z], r = 9) => S(k.cylinder(x, y, r, z - r * 0.6, r * 1.2, P, 20, 0.3), { tone: "hi" });
+  f.part("body", `<g class="rb-ghost">${S(k.slabOf({ x: -270, y: -170, w: 40, d: 340, r: 8 }, -40, 340, P, 4, 1), { tone: "lo" })}</g>`);
+  const bar = [[-230, -160, 30], [-230, 120, 30], [-140, 130, 40]];
+  f.part("swayBar", rod(bar, 7, "lo"));
+  const lower = [[[-235, -95, -10], [0, -10, -20]], [[-235, 95, -10], [0, 10, -20]]];
+  f.part("lowerArms", lower.map(([a, b]) => rod([a, b], 9, "mid") + joint(a) + joint(b)).join(""), [0, 0, -70]);
+  const spring = [];
+  for (let i = 0; i <= 96; i++) {
+    const t = i / 96, a = t * 7 * 2 * Math.PI;
+    spring.push([-95 + 26 * Math.cos(a), 26 * Math.sin(a), 70 + t * 150]);
+  }
+  f.part("strut", rod([[-80, 0, -10], [-100, 0, 220]], 14, "mid") + rod([[-100, 0, 200], [-110, 0, 300]], 6, "hi") + rod(spring, 3, "lo") + S(k.cylinder(-110, 0, 34, 290, 14, P, 32, 0.4), { tone: "hi" }), [0, 0, 120]);
+  f.part("swayLink", rod([[-140, 130, 40], [-100, 40, 150]], 5, "hi") + joint([-140, 130, 40], 7) + joint([-100, 40, 150], 7), [0, 60, 0]);
+  const upper = [[[-210, -70, 200], [-10, -8, 170]], [[-210, 70, 200], [-10, 8, 170]]];
+  f.part("upperArms", upper.map(([a, b]) => rod([a, b], 7, "mid") + joint(a, 8) + joint(b, 8)).join(""), [0, 0, 80]);
+  f.part("knuckle", S(k.slabOf({ x: -14, y: -24, w: 28, d: 48, r: 6 }, -30, 210, P, 3, 0.6), { tone: "lo" }) + S(G.disc(14, 40, 42, X([0, 0, 80]), P), { tone: "mid" }));
+  return f.svg();
+}
+
+// A transmission case from the side: the fill/level plug higher up, the drain plug at the
+// bottom, and an external fluid filter. Generic, not a particular Audi transmission.
+export function transmission() {
+  const f = figure({ id: "transmission", label: "A transmission case seen from the side, with the fill and level plug higher up, the drain plug at the bottom, and an external fluid filter.", fit: [[-200, -110, -60], [200, -110, -60], [-200, 110, 220], [200, 110, 220]], azimuth: 34, elevation: 20, width: 560, height: 420 });
+  const { P } = f;
+  const F = X([0, 0, 0]);
+  const plug = (y, z) => S(G.disc(0, 12, 12, G.frameOf([200, y, z], [1, 0, 0], [0, 1, 0], [0, 0, 1]), P), { tone: "hi" }) + S(G.disc(12, 18, 16, G.frameOf([200, y, z], [1, 0, 0], [0, 1, 0], [0, 0, 1]), P), { tone: "mid" });
+  f.part("filter", S(k.cylinder(-60, -150, 34, 120, 70, P, 40, 0.4), { tone: "hi" }), [0, 0, 90]);
+  f.part("case", S(k.slabOf({ x: -170, y: -80, w: 340, d: 160, r: 16 }, -60, 20, P, 4, 1), { tone: "lo" }) + S(k.slabOf({ x: -200, y: -100, w: 400, d: 200, r: 30 }, -40, 230, P, 6, 1.5), { tone: "mid" }));
+  f.part("fillPlug", plug(20, 110), [70, 0, 0]);
+  f.part("drainPlug", plug(-20, -40), [70, 0, -50]);
+  void F;
+  return f.svg();
+}

@@ -14,7 +14,10 @@ node site/build.mjs --public   # leaves out jobs marked private
 node site/build.mjs --dark     # dark theme
 ```
 
-Then open `site/dist/index.html` in a browser. The catalog filters by car, system, difficulty,
+Then open `site/dist/index.html` in a browser. `site/dist/symptoms.html` (linked from the
+catalog) starts from what you notice, such as a knock over bumps or a warning light, and links to
+the jobs for each likely cause. Its data is in `site/symptoms.mjs`; the build stops if it names a
+job that doesn't exist, and a public build simply leaves out links to private jobs. The catalog filters by car, system, difficulty,
 time and whether specs are loaded, plus a text search. The filters are kept in the address
 (for example `index.html#system=Brakes&time=120`), so a filtered view can be bookmarked or shared. Each page in `site/dist/jobs/` also works on
 its own. `site/dist/` is not committed: build it after cloning.
@@ -40,6 +43,12 @@ its own. `site/dist/` is not committed: build it after cloning.
 | `a4-b8-aux-belt`: auxiliary belt check and replacement, 5 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-jump-start`: jump start from a car or a jump pack, 6 steps | **Draft** | General practice and the owner's manual |
 | `a4-b8-flat-tire`: spare wheel or repair kit at the roadside, up to 5 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-upper-control-arms`: front upper control arms, 6 steps | **Draft**, common problem | Licensed data, not loaded yet |
+| `a4-b8-sway-bar-links`: anti-roll bar links, 3 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-shocks`: front shock absorbers, 5 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-carbon-cleaning`: intake valve carbon cleaning (2.0 TFSI), 5 steps | **Draft**, common problem | Licensed data, not loaded yet |
+| `a4-b8-transmission-fluid`: transmission fluid service (CVT, automatic, dual-clutch or manual), up to 8 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-coolant-change`: coolant drain, refill and bleed, 5 steps | **Draft** | Licensed data, not loaded yet |
 | `ea888-timing-chain-check`: valve timing check for chain stretch or a jumped tooth, 6 steps | Ready, **private**, common problem | Audi repair manual, Rep. Gr. 15 |
 | `ea888-coolant-pump-leak`: pressure test, coolant pump and thermostat replacement, 9 steps | Ready, **private**, common problem | Audi repair manual, Rep. Gr. 19 |
 | `ea888-pcv-oil-separator`: crankcase breather test and replacement, 3 steps | Ready, **private**, common problem | Audi repair manual, Rep. Gr. 17 |
@@ -119,7 +128,8 @@ one of `flange`, `cover`, `bracket`, `pan`, `wheel`; or a column of bearing caps
 | `build.mjs` | Builds the catalog and every job page into `dist/` |
 | `runtime/game.js`, `runtime/game.css` | The job engine shared by every job |
 | `lib/page.mjs` | Page templates and the build checks |
-| `lib/small-figures.mjs` | Drawings for the small jobs: filter box, wiper, battery, headlamp, ignition coils, belt drive |
+| `lib/small-figures.mjs` | Drawings for the small jobs: filter box, wiper, battery, headlamp, ignition coils, belt drive, suspension, transmission |
+| `symptoms.mjs` | The symptom guide's data |
 | `lib/a4b8.mjs` | Shared settings for the A4 B8 draft jobs |
 | `lib/diagrams.mjs` | Shared bolt patterns |
 | `lib/figure.mjs` | Drawing helpers on top of the Anatomy kit (`.claude/skills/anatomy`) |
