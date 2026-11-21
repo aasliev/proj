@@ -3,8 +3,8 @@
 // Proportions are generic, not measured from a B8 part.
 import { figure, sector, S, L, D, X, G, k } from "../../lib/figure.mjs";
 
-function corner() {
-  const f = figure({ id: "corner", label: "A front brake corner seen from outboard: the hub, the brake disc, the caliper carrier over the top of the disc, the inner and outer pads, the caliper and the wheel.", fit: [[-30, -180, -170], [-30, 180, 260], [150, -180, -170], [150, 180, 260]], azimuth: 48, elevation: 20, width: 560, height: 460 });
+export function corner(label = "A front brake corner seen from outboard: the hub, the brake disc, the caliper carrier over the top of the disc, the inner and outer pads, the caliper and the wheel.") {
+  const f = figure({ id: "corner", label, fit: [[-30, -180, -170], [-30, 180, 260], [150, -180, -170], [150, 180, 260]], azimuth: 48, elevation: 20, width: 560, height: 460 });
   const { P } = f;
   const F = X([0, 0, 0]);
   const prism = (poly, s0, s1, style) => S(G.prismOf(F, poly, s0, s1, P), style);

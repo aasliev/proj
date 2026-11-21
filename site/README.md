@@ -35,6 +35,11 @@ its own. `site/dist/` is not committed: build it after cloning.
 | `a4-b8-battery`: battery test and replacement, 7 steps | **Draft** (voltage guide graded from general practice) | Licensed data, not loaded yet |
 | `a4-b8-bulbs`: halogen headlamp bulb, 5 steps; xenon and LED stop at step 1 | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-annual-check`: whole-car inspection checklist, 8 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-rear-brakes`: rear pads and discs, electric or lever parking brake, up to 9 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-spark-plugs`: spark plugs and ignition coils (2.0 TFSI), 5 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-aux-belt`: auxiliary belt check and replacement, 5 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-jump-start`: jump start from a car or a jump pack, 6 steps | **Draft** | General practice and the owner's manual |
+| `a4-b8-flat-tyre`: spare wheel or repair kit at the roadside, up to 5 steps | **Draft** | Licensed data, not loaded yet |
 
 A **draft** has the full procedure, but no specs: torques show as "spec not loaded" and
 measurements are recorded without a grade. Nothing in it is a guessed number.
@@ -109,7 +114,7 @@ one of `flange`, `cover`, `bracket`, `pan`, `wheel`; or a column of bearing caps
 | `build.mjs` | Builds the catalogue and every job page into `dist/` |
 | `runtime/game.js`, `runtime/game.css` | The job engine shared by every job |
 | `lib/page.mjs` | Page templates and the build checks |
-| `lib/small-figures.mjs` | Drawings for the small jobs: filter box, wiper, battery, headlamp |
+| `lib/small-figures.mjs` | Drawings for the small jobs: filter box, wiper, battery, headlamp, ignition coils, belt drive |
 | `lib/a4b8.mjs` | Shared settings for the A4 B8 draft jobs |
 | `lib/diagrams.mjs` | Shared bolt patterns |
 | `lib/figure.mjs` | Drawing helpers on top of the Anatomy kit (`.claude/skills/anatomy`) |

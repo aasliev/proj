@@ -22,8 +22,10 @@ Opening the file on github.com only shows its source code; clone or download it 
   one is done.
 - **Garage** mode shows every spec plainly, as a checklist to tick off at the bench.
 - Step 1 asks which versions of some parts your engine has (rod bolt size, oil ring
-  type, flange and cover bolt counts, head bolt type and so on). Check your parts:
-  the torques depend on them.
+  type, flange and cover bolt counts, head bolt type and so on), and whether the
+  balance shafts came out of the block. Check your parts: the torques depend on
+  them. The balance shafts and their bolts are only replaced if they were removed
+  (Rep. Gr. 13, p. 43); if they stayed in, their steps are skipped.
 - Measurement steps grade each reading against the manual's new-part range and
   wear limit. Enter your real readings, or use "Fill practice readings".
 - Progress and measurements are saved in your browser on this computer only.

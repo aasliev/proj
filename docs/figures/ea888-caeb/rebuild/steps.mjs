@@ -17,6 +17,14 @@ const STAGE2_AND_3 = BEFORE_REAR.flatMap((step) => (step.id === "head-gate" ? HE
 for (const group of GROUPS2.before) if (group.id === "head") group.name = "Cylinder head and camshafts";
 
 export const VARIANTS = {
+  bsRemoved: {
+    q: "Were the balance shafts taken out of the block?",
+    help: "The manual says to replace the balance shafts and their bolts after removing them (Rep. Gr. 13, p. 43). If they stayed in the block, they are not replaced and their steps are skipped.",
+    options: [
+      { id: "yes", label: "Yes, removed" },
+      { id: "no", label: "No, still in the block" },
+    ],
+  },
   rodBolt: {
     q: "Connecting rod bolt size",
     help: "Measure a rod bolt's thread. The manual gives a different torque for M8 and M9 bolts (Rep. Gr. 13, p. 51).",
@@ -76,8 +84,8 @@ export const STEPS = [
     title: "Identify your engine's versions",
     figure: "overview",
     ref: "13 · p. 31, 51–53",
-    say: "This manual covers several versions of the Gen 2 engine. Three things change specs in the bottom end, so set them before you start; every later step uses them.",
-    tasks: [{ type: "variant", keys: ["rodBolt", "oilRing", "flange"] }],
+    say: "This manual covers several versions of the Gen 2 engine, and your teardown decides which parts are replaced. Set these before you start; every later step uses them.",
+    tasks: [{ type: "variant", keys: ["bsRemoved", "rodBolt", "oilRing", "flange"] }],
   },
   {
     id: "parts",
@@ -92,8 +100,6 @@ export const STEPS = [
         items: [
           "10 main bearing cap bolts and 6 side bolts (stretch bolts, replace after removing) · 13 · p. 38",
           "8 connecting rod bolts (replace after removing) · 13 · p. 51",
-          "Both balance shafts, intake and exhaust side (replace after removing) · 13 · p. 43",
-          "Two balance shaft bolts (replace after removing) · 13 · p. 43",
           "Intermediate sprocket and its bolt (never reuse the sprocket) · 15 · p. 76–77",
           "O-ring for the intermediate sprocket's mounting pin · 15 · p. 77",
           "Intake-side balance shaft seal · 13 · p. 49",
@@ -105,6 +111,8 @@ export const STEPS = [
           "Plastigauge, for the bearing clearance checks · 13 · p. 41, 59",
         ],
       },
+      { type: "check", when: { bsRemoved: "yes" }, items: ["Both balance shafts, intake and exhaust side: replace only because they were removed · 13 · p. 43", "Two balance shaft bolts: replace only because they were removed · 13 · p. 43"] },
+      { type: "note", when: { bsRemoved: "no" }, text: "The balance shafts stayed in the block, so they and their bolts are not replaced, and their install steps are skipped. The intermediate sprocket and the intake-side seal are still new." },
     ],
   },
   {
@@ -220,6 +228,7 @@ export const STEPS = [
   },
   {
     id: "bs-pipe",
+    when: { bsRemoved: "yes" },
     group: "balance",
     title: "Fit the exhaust-side balance shaft pipe",
     figure: "balance",
@@ -240,13 +249,14 @@ export const STEPS = [
   },
   {
     id: "bs-exhaust",
+    when: { bsRemoved: "yes" },
     group: "balance",
     title: "Install the exhaust-side balance shaft",
     figure: "balance",
     focus: ["bsEx"],
     install: ["bsEx"],
     ref: "13 · p. 43, 47–49",
-    say: "Use a new shaft. The clearance to the block is small, so try it in by hand first; if it will not go in without force, chill it.",
+    say: "Use a new shaft: the manual says to replace the balance shafts after removing them. The clearance to the block is small, so try it in by hand first; if it will not go in without force, chill it.",
     tasks: [
       {
         type: "choice",
@@ -263,6 +273,7 @@ export const STEPS = [
   },
   {
     id: "bs-intake",
+    when: { bsRemoved: "yes" },
     group: "balance",
     title: "Install the intake-side balance shaft",
     figure: "balance",
@@ -271,7 +282,7 @@ export const STEPS = [
     ref: "13 · p. 43, 46",
     say: "Same as the exhaust side: a new shaft, chilled if it will not go in by hand, bearings oiled.",
     tasks: [
-      { type: "check", items: ["New intake-side shaft (replace after removing)", "Bearings lubricated with engine oil", "Cooled first if it would not slide in without force"] },
+      { type: "check", items: ["New intake-side shaft (it was removed, so it is replaced)", "Bearings lubricated with engine oil", "Cooled first if it would not slide in without force"] },
       { type: "torque", what: "Balance shaft bolt, intake side (new)", stages: [{ bolts: "Bolt", nm: 9 }] },
     ],
   },

@@ -2,6 +2,7 @@
 // headlamp. They show what the parts look like and how they come apart, not their exact shape
 // or where they sit on a particular car.
 import { figure, S, L, k, G, X, Z } from "./figure.mjs";
+import { tubePieces, tubeSvg } from "../../.claude/skills/anatomy/kit/tube.mjs";
 
 // A filter in its housing: box, pleated element, lid. `flat` makes it a thin cabin filter tray.
 export function filterBox({ id, label, flat = false }) {
@@ -61,5 +62,36 @@ export function headlamp() {
   f.part("connector", S(G.prismOf(F, [[-14, -10], [14, -10], [14, 10], [-14, 10]], 78, 82, P), { tone: "lo" }), [200, 0, 0]);
   f.part("cover", S(G.disc(64, 84, 62, F, P), { tone: "mid" }) + L(G.circleOf(F, 84, 48, P, 48), { tone: "lo" }), [90, 0, 0]);
   void Z;
+  return f.svg();
+}
+
+// Four ignition coils in a row on top of the cylinder head, the spark plugs in their wells below.
+export function ignition() {
+  const f = figure({ id: "ignition", label: "The top of a four-cylinder head drawn see-through: four ignition coils standing in their spark plug wells, and the spark plugs at the bottom of the wells.", fit: [[-200, -70, -60], [200, 70, -60], [-200, -70, 130], [200, 70, 130]], azimuth: 30, elevation: 26, width: 560, height: 420 });
+  const { P } = f;
+  const xs = [-135, -45, 45, 135];
+  f.part("head", `<g class="rb-ghost">${S(k.slabOf({ x: -190, y: -65, w: 380, d: 130, r: 10 }, -60, 100, P, 4, 1), { tone: "lo" })}</g>` + L(xs.map((x) => k.ring(x, 0, 16, 40, P, 32)).join(""), { tone: "lo" }));
+  const plug = (x) => S(k.cylinder(x, 0, 4, -52, 10, P, 12, 0.3), { tone: "mid" }) + S(k.cylinder(x, 0, 9, -42, 14, P, 6, 0.3), { tone: "lo" }) + S(k.cylinder(x, 0, 6, -28, 30, P, 16, 0.3), { tone: "hi" });
+  f.part("plugs", xs.map(plug).join(""), [0, 0, 120]);
+  const coil = (x) => S(k.cylinder(x, 0, 11, -2, 52, P, 24, 0.3), { tone: "mid" }) + S(k.slabOf({ x: x - 24, y: -26, w: 48, d: 52, r: 8 }, 50, 34, P, 3, 0.6), { tone: "hi" }) + S(k.slabOf({ x: x - 9, y: 26, w: 18, d: 14, r: 3 }, 62, 14, P, 2, 0.5), { tone: "lo" });
+  f.part("coils", xs.map(coil).join(""), [0, 0, 160]);
+  return f.svg();
+}
+
+// The auxiliary (ribbed) belt round its pulleys, seen from the end of the engine.
+export function beltDrive() {
+  const f = figure({ id: "belt", label: "The end of an engine with the auxiliary belt running round the crankshaft pulley, the alternator, the air conditioning compressor and the belt tensioner.", fit: [[0, -190, -100], [0, 230, -100], [0, -190, 280], [0, 230, 280], [60, 0, 0]], azimuth: 22, elevation: 14, width: 520, height: 440 });
+  const { P } = f;
+  const F = X([0, 0, 0]);
+  const pulleys = [[0, 0, 74, "crank"], [-120, 220, 34, "alternator"], [150, 50, 56, "ac"], [70, 170, 32, "tensioner"]];
+  const at = (y, z) => G.frameOf([0, y, z], [1, 0, 0], [0, 1, 0], [0, 0, 1]);
+  f.part("engine", `<g class="rb-ghost">${S(k.slabOf({ x: -120, y: -180, w: 100, d: 400, r: 10 }, -90, 360, P, 4, 1), { tone: "lo" })}</g>`);
+  const disc = ([y, z, r]) => S(G.disc(-20, 22, r, at(y, z), P), { tone: "mid" }) + S(G.disc(22, 26, r * 0.45, at(y, z), P), { tone: "hi" });
+  f.part("pulleys", pulleys.filter((p) => p[3] !== "tensioner").map(disc).join(""));
+  f.part("tensioner", disc(pulleys[3]) + S(G.prismOf(at(pulleys[3][0], pulleys[3][1]), [[-8, -60], [8, -60], [8, 0], [-8, 0]], -24, -20, P), { tone: "lo" }), [0, 30, 30]);
+  const ring = pulleys.flatMap(([y, z, r]) => Array.from({ length: 48 }, (_, i) => [y + (r + 3) * Math.cos((i / 48) * 2 * Math.PI), z + (r + 3) * Math.sin((i / 48) * 2 * Math.PI)]));
+  const loop = G.hullOf(ring).map(([y, z]) => [18, y, z]);
+  f.part("beltLoop", tubePieces(loop, 3, P, { closed: true, maxLength: 60, spacing: 1 }).map((piece) => tubeSvg(piece, { tone: "lo" })).join(""), [90, 0, 0]);
+  void F; void Z;
   return f.svg();
 }
