@@ -17,7 +17,7 @@ export const meta = draftMeta({
 const VARIANTS = {
   parking: {
     q: "Parking brake",
-    help: "A button marked (P) on the centre console is an electric parking brake, with a motor on each rear caliper. A lever between the seats is a cable handbrake.",
+    help: "A button marked (P) on the center console is an electric parking brake, with a motor on each rear caliper. A lever between the seats is a cable parking brake.",
     options: [
       { id: "electric", label: "Electric (button)" },
       { id: "lever", label: "Lever (cable)" },
@@ -43,9 +43,9 @@ const STEPS = [
     say: "The rear brakes hold the parking brake, so how you push the pistons back depends on which kind you have. Find out first, and get the parts for your brake version.",
     tasks: [
       { type: "variant", keys: ["parking"] },
-      { type: "check", items: ["Rear pads and discs for your brake version", "New disc retaining screw and any single-use bolts your source lists (spec not loaded)", "Car level on axle stands, front wheels chocked, gear in P or first"] },
+      { type: "check", items: ["Rear pads and discs for your brake version", "New disc retaining screw and any single-use bolts your source lists (spec not loaded)", "Car level on axle stands, front wheels chocked, transmission in P (or first gear for a manual)"] },
       { type: "check", when: { parking: "electric" }, items: ["Diagnostic tool that can put the electric parking brake into service (pad change) mode"] },
-      { type: "check", when: { parking: "lever" }, items: ["Piston wind-back tool that fits the caliper piston", "Handbrake lever released"] },
+      { type: "check", when: { parking: "lever" }, items: ["Piston wind-back tool that fits the caliper piston", "Parking brake lever released"] },
     ],
   },
   {
@@ -122,7 +122,7 @@ const STEPS = [
     focus: ["caliper"],
     ref: "",
     when: { parking: "lever" },
-    say: "On a cable handbrake caliper the piston screws back: turn it clockwise with the wind-back tool while pressing gently, until it is fully home. Watch the brake fluid reservoir level as you go.",
+    say: "On a cable parking brake caliper the piston screws back: turn it clockwise with the wind-back tool while pressing gently, until it is fully home. Watch the brake fluid reservoir level as you go.",
     tasks: [{ type: "check", items: ["Reservoir checked: some fluid drawn off if it was at MAX", "Piston wound fully back, dust boot still seated", "Piston slot lined up as your source shows for the pad's pin, if it has one"] }],
   },
   {
@@ -144,10 +144,10 @@ const STEPS = [
     focus: ["wheel", "bolts"],
     install: ["wheel", "bolts"],
     ref: "",
-    say: "Do the other side the same way. With both sides done, end service mode so the motors bring the pads up to the discs, or with a cable handbrake, pump the pedal and set the handbrake as your source says. Then the wheels go on.",
+    say: "Do the other side the same way. With both sides done, end service mode so the motors bring the pads up to the discs, or with a cable parking brake, pump the pedal and set the parking brake as your source says. Then the wheels go on.",
     tasks: [
       { type: "check", when: { parking: "electric" }, items: ["Both sides done", "Service mode ended with the diagnostic tool; parking brake applied and released once to check", "No parking brake warning on the dashboard"] },
-      { type: "check", when: { parking: "lever" }, items: ["Both sides done", "Brake pedal pumped until firm", "Handbrake travel checked and adjusted only if your source says so"] },
+      { type: "check", when: { parking: "lever" }, items: ["Both sides done", "Brake pedal pumped until firm", "Parking brake travel checked and adjusted only if your source says so"] },
       { type: "order", diagram: "wheel", q: "Tighten the wheel bolts in a star pattern, starting with the top bolt." },
       { type: "torque", what: "Wheel bolts", tool: "torque wrench", stages: [pending("All five, in the star pattern")] },
       { type: "check", items: ["Brake fluid level between MIN and MAX", "Brakes tested at low speed, then bedded in gently", "Parking brake holds the car on a slope"] },

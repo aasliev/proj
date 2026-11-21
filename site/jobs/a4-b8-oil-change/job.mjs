@@ -9,7 +9,7 @@ export const meta = {
   vehicle: { make: "Audi", model: "A4", generation: "B8", years: "2008–2016" },
   engine: "2.0 TFSI (EA888, e.g. CAEB)",
   system: "Service",
-  vehicleLine: "Audi A4 (B8, 2008–2016), 2.0 TFSI petrol engine",
+  vehicleLine: "Audi A4 (B8, 2008–2016), 2.0 TFSI gasoline engine",
   status: "draft",
   private: false,
   minutes: 60,
@@ -76,15 +76,15 @@ const STEPS = [
     ],
   },
   {
-    id: "undertray",
+    id: "splash-shield",
     group: "prep",
-    title: "Open the filler cap and remove the undertray",
+    title: "Open the filler cap and remove the splash shield",
     figure: "bay",
     focus: ["oilCap"],
     remove: ["oilCap"],
     ref: "",
-    say: "Take the oil filler cap off: air coming in from the top lets the oil drain freely. Under the car, take off the engine undertray (the noise insulation panel) to reach the drain plug.",
-    tasks: [{ type: "check", items: ["Oil filler cap off, laid somewhere clean", "Undertray off, its screws kept together"] }],
+    say: "Take the oil filler cap off: air coming in from the top lets the oil drain freely. Under the car, take off the engine splash shield (the noise insulation panel) to reach the drain plug.",
+    tasks: [{ type: "check", items: ["Oil filler cap off, laid somewhere clean", "Splash shield off, its screws kept together"] }],
   },
   {
     id: "drain",
@@ -94,7 +94,7 @@ const STEPS = [
     focus: ["drainPlug", "sealRing"],
     remove: ["drainPlug", "sealRing"],
     ref: "",
-    say: "Put the drain pan under the plug, a little to the side the oil will shoot towards. Loosen the plug with a ring spanner, then unscrew the last turns by hand, pushing it in, and pull it away quickly. Let the oil drain until it only drips.",
+    say: "Put the drain pan under the plug, a little to the side the oil will shoot toward. Loosen the plug with a box-end wrench, then unscrew the last turns by hand, pushing it in, and pull it away quickly. Let the oil drain until it only drips.",
     tasks: [
       { type: "check", items: ["Drain pan in place", "Plug out, oil draining", "Old seal ring off the plug (it may stick to the pan)", "Plug threads and pan sealing face wiped clean and checked for damage"] },
       {
@@ -103,7 +103,7 @@ const STEPS = [
         options: [
           { text: "Normal for an engine that only makes short trips", ok: false, why: "A little condensation under the filler cap can come from short trips, but milky oil in the pan is not normal." },
           { text: "Coolant may be getting into the oil", ok: true, why: "That points to a fault such as a head gasket or oil cooler. Don't just refill: have it diagnosed before driving." },
-          { text: "The oil was the wrong viscosity", ok: false, why: "Viscosity doesn't change the oil's colour like that." },
+          { text: "The oil was the wrong viscosity", ok: false, why: "Viscosity doesn't change the oil's color like that." },
         ],
       },
     ],
@@ -145,7 +145,7 @@ const STEPS = [
     focus: ["drainPlug", "sealRing"],
     install: ["sealRing", "drainPlug"],
     ref: "",
-    say: "A crushed seal doesn't seal twice. Fit the new seal ring, screw the plug in by hand to be sure it isn't cross-threaded, then torque it. The pan is aluminium: an overtightened plug strips its thread.",
+    say: "A crushed seal doesn't seal twice. Fit the new seal ring, screw the plug in by hand to be sure it isn't cross-threaded, then torque it. The pan is aluminum: an overtightened plug strips its thread.",
     tasks: [
       { type: "check", items: ["New seal ring on the plug", "Plug started by hand, at least two turns, without force"] },
       { type: "torque", what: "Oil drain plug", tool: "torque wrench", stages: [pending("Drain plug")] },
@@ -161,7 +161,7 @@ const STEPS = [
     ref: "",
     say: "Pour in a little less than the full quantity, then fit the filler cap. Run the engine for a minute, so the filter fills, and check for leaks at the plug and filter. Switch off and wait a few minutes for the oil to settle back into the pan.",
     tasks: [
-      { type: "check", items: ["Oil poured in, about half a litre short of the full quantity", "Filler cap on", "Engine run for about a minute; oil warning light went out within seconds", "No leaks at the drain plug or filter", "Engine off, waited a few minutes"] },
+      { type: "check", items: ["Oil poured in, about half a liter short of the full quantity", "Filler cap on", "Engine run for about a minute; oil warning light went out within seconds", "No leaks at the drain plug or filter", "Engine off, waited a few minutes"] },
       {
         type: "choice",
         q: "Why not put the full quantity in at once?",
@@ -186,12 +186,12 @@ const STEPS = [
   {
     id: "finish",
     group: "fill",
-    title: "Finish: undertray, service reminder, old oil",
+    title: "Finish: splash shield, service reminder, old oil",
     figure: "sump",
     focus: ["pan"],
     ref: "",
-    say: "Refit the undertray and lower the car. Reset the service reminder as your source describes for your car (through the instrument cluster or the MMI menu, or with a diagnostic tool), so the car counts down to the next change.",
-    tasks: [{ type: "check", items: ["Undertray refitted, all screws in", "Car lowered", "Service reminder reset", "Date and mileage noted in the service record", "Old oil and filter taken to a collection point: never into a drain or household rubbish"] }],
+    say: "Refit the splash shield and lower the car. Reset the service reminder as your source describes for your car (through the instrument cluster or the MMI menu, or with a diagnostic tool), so the car counts down to the next change.",
+    tasks: [{ type: "check", items: ["Splash shield refitted, all screws in", "Car lowered", "Service reminder reset", "Date and mileage noted in the service record", "Old oil and filter taken to a collection point: never into a drain or household trash"] }],
   },
 ];
 

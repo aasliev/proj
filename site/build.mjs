@@ -1,4 +1,4 @@
-// Builds the car fix site: a catalogue page plus one self-contained page per job.
+// Builds the car fix site: a catalog page plus one self-contained page per job.
 //   node site/build.mjs            all jobs, including private ones (for your own use)
 //   node site/build.mjs --public   leaves out jobs marked private
 //   node site/build.mjs --dark     dark theme
@@ -6,7 +6,7 @@
 import { mkdirSync, readdirSync, rmSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { jobPage, cataloguePage } from "./lib/page.mjs";
+import { jobPage, catalogPage } from "./lib/page.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = process.argv.includes("--public");
@@ -32,5 +32,5 @@ for (const dir of readdirSync(join(HERE, "jobs")).sort()) {
   listed.push({ meta, href: `jobs/${meta.id}.html`, steps: data.steps.length });
   console.log("wrote", `jobs/${meta.id}.html`, `${(page.length / 1024).toFixed(0)} KB`, `${data.steps.length} steps`, meta.status);
 }
-writeFileSync(join(OUT, "index.html"), cataloguePage(listed, { theme }));
+writeFileSync(join(OUT, "index.html"), catalogPage(listed, { theme }));
 console.log("wrote index.html", `${listed.length} jobs`, PUBLIC ? "(public build)" : "(includes private jobs)");

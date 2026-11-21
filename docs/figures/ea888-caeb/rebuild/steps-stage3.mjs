@@ -42,7 +42,7 @@ export const HEAD_STEPS = [
           "10 cylinder head bolts and the 4 bolts marked with arrows in the figure (replace after removing) · 15 · p. 104, 107",
           "6 cylinder head cover bolts (replace after removing) · 15 · p. 119",
           "Cap in the cylinder head cover (always replaced once the cover has been off) · 15 · p. 119, 126",
-          "Valve stem seals, and a mounting sleeve from the parts catalogue · 15 · p. 134–137",
+          "Valve stem seals, and a mounting sleeve from the parts catalog · 15 · p. 134–137",
           "Check valve for the oil channel in the head, if you removed it · 15 · p. 113–114",
           "O-rings and seals on the head (replace after removing) · 15 · p. 105–106, 112",
           "Silicone sealant for the cylinder head cover, in date · 15 · p. 126, 130",

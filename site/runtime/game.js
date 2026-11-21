@@ -267,7 +267,7 @@ function render(fresh = false) {
     <p class="rb-say">${esc(step.say)}</p>
     <p class="rb-ref">${esc(refLine(step.ref))}</p>
     ${tasks.map((task) => `<section class="rb-task" ${taskDone(step, task) ? "data-done" : ""}>${VIEWS[task.type](step, task)}</section>`).join("")}
-    <div class="rb-nav"><button type="button" class="rb-btn" data-go="-1" ${S.step === 0 ? "disabled" : ""}>Back</button><span class="rb-state">${done ? "Step complete" : garage() ? "Tick off as you go" : "Answer every task to continue"}</span><button type="button" class="rb-btn rb-primary" data-go="1" ${S.step === all.length - 1 || (!done && !garage()) ? "disabled" : ""}>Next step</button></div>`;
+    <div class="rb-nav"><button type="button" class="rb-btn" data-go="-1" ${S.step === 0 ? "disabled" : ""}>Back</button><span class="rb-state">${done ? "Step complete" : garage() ? "Check off as you go" : "Answer every task to continue"}</span><button type="button" class="rb-btn rb-primary" data-go="1" ${S.step === all.length - 1 || (!done && !garage()) ? "disabled" : ""}>Next step</button></div>`;
   renderFigure(step, fresh);
   list.innerHTML = D.groups.map((g) => {
     const items = all.map((s, i) => [s, i]).filter(([s]) => s.group === g.id);

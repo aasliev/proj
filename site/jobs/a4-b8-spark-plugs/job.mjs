@@ -6,7 +6,7 @@ export const meta = draftMeta({
   id: "a4-b8-spark-plugs",
   title: "Spark plugs and ignition coils",
   engine: "2.0 TFSI (EA888, e.g. CAEB)",
-  vehicleLine: "Audi A4 (B8, 2008–2016), 2.0 TFSI petrol engine",
+  vehicleLine: "Audi A4 (B8, 2008–2016), 2.0 TFSI gasoline engine",
   system: "Service",
   minutes: 60,
   difficulty: "Beginner–intermediate",
@@ -24,7 +24,7 @@ const STEPS = [
     figure: "ignition",
     focus: ["coils"],
     ref: "",
-    say: "Plugs are threaded into an aluminium head: work only on a cold engine, or the threads can be damaged. Use the plug type your source gives for the engine code: heat range and gap matter on a turbo engine.",
+    say: "Plugs are threaded into an aluminum head: work only on a cold engine, or the threads can be damaged. Use the plug type your source gives for the engine code: heat range and gap matter on a turbo engine.",
     tasks: [{ type: "check", items: ["Engine cold", "Four plugs of the type your source gives (spec not loaded); gap checked only if your source says to set it", "Spark plug socket with a rubber insert and an extension", "Coil puller, or the special tool your source names", "Torque wrench for the plug torque"] }],
   },
   {
@@ -57,8 +57,8 @@ const STEPS = [
     focus: ["plugs"],
     remove: ["plugs"],
     ref: "",
-    say: "Blow any dirt out of each plug well with compressed air before you loosen a plug, so nothing falls into the cylinder. Undo each plug with the socket and extension, by hand only at the end. Look at each old plug: its colour tells you how that cylinder is running.",
-    tasks: [{ type: "check", items: ["Wells blown clean before loosening", "Plugs out one at a time", "Old plugs compared: even light brown or grey is normal; oily, black and sooty, or white and blistered is not"] }],
+    say: "Blow any dirt out of each plug well with compressed air before you loosen a plug, so nothing falls into the cylinder. Undo each plug with the socket and extension, by hand only at the end. Look at each old plug: its color tells you how that cylinder is running.",
+    tasks: [{ type: "check", items: ["Wells blown clean before loosening", "Plugs out one at a time", "Old plugs compared: even light brown or gray is normal; oily, black and sooty, or white and blistered is not"] }],
   },
   {
     id: "plugs-in",

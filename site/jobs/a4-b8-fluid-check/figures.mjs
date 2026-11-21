@@ -8,7 +8,7 @@ export function bay() {
   const f = figure({ id: "bay", label: "An engine bay seen from above: the engine with its oil filler cap and dipstick, the coolant expansion tank, the brake fluid reservoir and the washer fluid filler cap.", fit: [[-300, -170, 0], [300, -170, 0], [-300, 170, 0], [300, 170, 0], [0, 0, 160]], azimuth: 30, elevation: 40, width: 600, height: 420 });
   const { P } = f;
   const items = [];
-  const add = (name, centre, svg, apart) => items.push({ name, d: f.depth(centre), svg, apart });
+  const add = (name, center, svg, apart) => items.push({ name, d: f.depth(center), svg, apart });
   const slab = (x, y, w, d, z, h, tone, r = 8) => S(k.slabOf({ x, y, w, d, r }, z, h, P, 4, 1), { tone });
   const cyl = (x, y, r, z, h, tone) => S(k.cylinder(x, y, r, z, h, P, 32, 0.4), { tone });
 

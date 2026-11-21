@@ -14,7 +14,7 @@ export const meta = draftMeta({
 const VARIANTS = {
   rear: {
     q: "Rear wiper",
-    help: "Saloons have no rear wiper; Avant (estate) and allroad models do.",
+    help: "Sedans have no rear wiper; Avant (wagon) and allroad models do.",
     options: [
       { id: "yes", label: "Rear wiper fitted" },
       { id: "no", label: "No rear wiper" },
@@ -32,7 +32,7 @@ const STEPS = [
     focus: ["blade"],
     ref: "",
     say: "Driver and passenger blades are usually different lengths, and the arm's fitting decides which blades fit. Buy by car model and year, or compare with the old blades.",
-    tasks: [{ type: "variant", keys: ["rear"] }, { type: "check", items: ["Front blades for this car, both lengths right", "Rear blade, if fitted", "A towel to protect the windscreen"] }],
+    tasks: [{ type: "variant", keys: ["rear"] }, { type: "check", items: ["Front blades for this car, both lengths right", "Rear blade, if fitted", "A towel to protect the windshield"] }],
   },
   {
     id: "service",
@@ -41,15 +41,15 @@ const STEPS = [
     figure: "wiper",
     focus: ["arm"],
     ref: "",
-    say: "Parked, the arms sit under the edge of the bonnet and can't be lifted. Many Audis have a service position: switch the ignition on and off, then push the wiper stalk down briefly, and the wipers stop upright on the glass. The owner's manual describes it for your car.",
+    say: "Parked, the arms sit under the edge of the hood and can't be lifted. Many Audis have a service position: switch the ignition on and off, then push the wiper stalk down briefly, and the wipers stop upright on the glass. The owner's manual describes it for your car.",
     tasks: [
-      { type: "check", items: ["Wipers moved to the service position as your owner's manual describes", "Towel laid on the windscreen under the arm"] },
+      { type: "check", items: ["Wipers moved to the service position as your owner's manual describes", "Towel laid on the windshield under the arm"] },
       {
         type: "choice",
-        q: "Why lay a towel on the windscreen?",
+        q: "Why lay a towel on the windshield?",
         options: [
           { text: "To keep the glass clean", ok: false, why: "That's not the risk." },
-          { text: "A bare arm can spring back and crack the windscreen", ok: true, why: "Without a blade, the arm's spring slams the metal end onto the glass." },
+          { text: "A bare arm can spring back and crack the windshield", ok: true, why: "Without a blade, the arm's spring slams the metal end onto the glass." },
           { text: "To stop water dripping into the car", ok: false, why: "No water is involved." },
         ],
       },

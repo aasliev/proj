@@ -211,7 +211,7 @@ function rings() {
 
 // ---------------------------------------------------------------- rod, cap and shells
 function rod() {
-  const f = figure({ id: "rod", label: "A connecting rod with its cap drawn apart, the two bearing shells centred between them and the two new rod bolts.", fit: [[-60, -30, -230], [60, 30, -230], [-60, -30, 40], [60, 30, 40]], azimuth: 30, elevation: 20 });
+  const f = figure({ id: "rod", label: "A connecting rod with its cap drawn apart, the two bearing shells centered between them and the two new rod bolts.", fit: [[-60, -30, -230], [60, 30, -230], [-60, -30, 40], [60, 30, 40]], azimuth: 30, elevation: 20 });
   const { P, V } = f;
   const z = -120;
   f.part("rod", rodSvg(f, z, 0, { rodOnly: true }));
@@ -357,7 +357,7 @@ function jets() {
 
 // ---------------------------------------------------------------- overview: the bare block
 function overview() {
-  const f = figure({ id: "overview", label: "The bare cylinder block: four 82.5 mm bores at 88 mm centres, the crankcase below.", fit: [[-210, -100, -60], [195, -100, -60], [-210, 100, 225], [195, 100, 225]], azimuth: 32, elevation: 28 });
+  const f = figure({ id: "overview", label: "The bare cylinder block: four 82.5 mm bores at 88 mm centers, the crankcase below.", fit: [[-210, -100, -60], [195, -100, -60], [-210, 100, 225], [195, 100, 225]], azimuth: 32, elevation: 28 });
   const { P } = f;
   const upper = { x: -205, y: -70, w: 393, d: 140, r: 6 };
   const lower = { x: -205, y: -98, w: 393, d: 196, r: 6 };

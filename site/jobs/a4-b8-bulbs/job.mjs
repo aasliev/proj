@@ -32,7 +32,7 @@ const STEPS = [
     figure: "headlamp",
     focus: ["housing"],
     ref: "",
-    say: "Bulb types differ between dipped beam, main beam and the other lamps. The owner's manual lists them, and how you reach the back of the lamp: from the engine bay, or through the wheel arch liner.",
+    say: "Bulb types differ between low beam, high beam and the other lamps. The owner's manual lists them, and how you reach the back of the lamp: from the engine bay, or through the wheel arch liner.",
     tasks: [
       { type: "variant", keys: ["lamp"] },
       { type: "note", when: { lamp: "xenon" }, text: "Stop: xenon lamps run at very high voltage, enough to injure or kill even when switched off. Follow your source's procedure exactly, or have a workshop do it." },
@@ -97,7 +97,7 @@ const STEPS = [
     ref: "",
     when: { lamp: "halogen" },
     say: "Refit the dust cover fully, or water and dirt get into the lamp. Switch on and check the beam against a wall: both sides at the same height. If it's clearly off, have the aim set at a garage.",
-    tasks: [{ type: "check", items: ["Dust cover seated all round", "Access panels refitted", "Lamp works on dipped and main beam", "Beam height looks the same both sides; aim checked if in doubt"] }],
+    tasks: [{ type: "check", items: ["Dust cover seated all round", "Access panels refitted", "Lamp works on low and high beam", "Beam height looks the same both sides; aim checked if in doubt"] }],
   },
 ];
 

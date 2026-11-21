@@ -41,7 +41,7 @@ const STEPS = [
     say: "Leave the car off for a few hours (overnight is best) so you read the battery's real state of charge, not a surface charge from driving. Measure across the terminals with a multimeter set to DC volts. Around 12.6 V or more is full; below 12.4 V it needs charging; below about 12 V it is flat.",
     tasks: [
       { type: "measure", spec: "voltage", label: "Resting voltage across the terminals", items: ["Reading"] },
-      { type: "check", items: ["If low: battery charged with a suitable charger and re-tested the next day", "If it won't hold a charge, or the car starts slowly even when charged: battery replaced (a load test at a parts shop confirms it)"] },
+      { type: "check", items: ["If low: battery charged with a suitable charger and re-tested the next day", "If it won't hold a charge, or the car starts slowly even when charged: battery replaced (a load test at a parts store confirms it)"] },
     ],
   },
   {
@@ -65,7 +65,7 @@ const STEPS = [
     focus: ["negClamp"],
     remove: ["negClamp"],
     ref: "",
-    say: "Undo the negative (−) clamp first and move it well away from the post. Then, if a spanner touches the car's metal while you're on the positive, nothing happens: the circuit is already broken.",
+    say: "Undo the negative (−) clamp first and move it well away from the post. Then, if a wrench touches the car's metal while you're on the positive, nothing happens: the circuit is already broken.",
     tasks: [
       { type: "check", items: ["Negative clamp off and tucked away so it can't spring back"] },
       {
@@ -73,7 +73,7 @@ const STEPS = [
         q: "Why does the negative come off first?",
         options: [
           { text: "It's the larger terminal", ok: false, why: "Size isn't the reason." },
-          { text: "The car's body is connected to negative, so a spanner touching metal while on the positive would short the battery", ok: true, why: "With the negative off first, an accidental contact can't complete a circuit." },
+          { text: "The car's body is connected to negative, so a wrench touching metal while on the positive would short the battery", ok: true, why: "With the negative off first, an accidental contact can't complete a circuit." },
           { text: "To protect the radio", ok: false, why: "The order is about shorts and sparks, not the radio." },
         ],
       },

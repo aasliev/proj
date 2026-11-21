@@ -1,5 +1,5 @@
 // Builds one self-contained HTML page for a job: the job engine (runtime/game.js) with the
-// job's data inlined. Also builds the catalogue page that links the jobs.
+// job's data inlined. Also builds the catalog page that links the jobs.
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -51,14 +51,14 @@ export function jobPage(meta, data, { theme = "light", back = "" } = {}) {
   return k.pageHtml({ title: meta.title, theme, body: `<style>${CSS}</style>${body}`, script: GAME, width: 1180 });
 }
 
-// The catalogue: jobs grouped by vehicle, with filters for system, difficulty, time, status
+// The catalog: jobs grouped by vehicle, with filters for system, difficulty, time, status
 // and a text search. Filters live in the URL hash, so a filtered view can be bookmarked or shared.
 const LEVELS = [["beginner", "Beginner"], ["intermediate", "Intermediate"], ["expert", "Expert"]];
 const TIMES = [["any", "Any time"], ["30", "Up to 30 min"], ["120", "Up to 2 h"], ["long", "Longer"]];
 const levelsOf = (difficulty) => LEVELS.map(([id]) => id).filter((id) => difficulty.toLowerCase().includes(id));
 const carOf = (v) => `${v.make} ${v.model}${v.generation ? ` (${v.generation})` : ""}`;
 
-export function cataloguePage(jobs, { theme = "light", title = "Car fixes" } = {}) {
+export function catalogPage(jobs, { theme = "light", title = "Car fixes" } = {}) {
   const byCar = new Map();
   for (const job of jobs) {
     const car = carOf(job.meta.vehicle);
@@ -190,6 +190,6 @@ search.addEventListener("input", () => { state.q = search.value.trim(); write();
 window.addEventListener("hashchange", () => { read(); apply(); });
 read(); apply();`;
 
-  const body = `<div class="cat"><h1>${esc(title)}</h1><p class="cat-lede">Step-by-step trainers for car repairs. Practise a job on screen first, with the torques, sequences and checks quizzed, then take the Garage checklist to the car.</p>${filters}${sections || "<p>No jobs in this build.</p>"}<p class="cat-empty" data-empty hidden>No jobs match these filters. <button type="button" class="cat-clear" data-clear>Clear filters</button></p><p class="cat-foot">Always check values against the source each job names. Jobs marked Draft have the procedure but no specs loaded yet.</p></div>`;
+  const body = `<div class="cat"><h1>${esc(title)}</h1><p class="cat-lede">Step-by-step trainers for car repairs. Practice a job on screen first, with the torques, sequences and checks quizzed, then take the Garage checklist to the car.</p>${filters}${sections || "<p>No jobs in this build.</p>"}<p class="cat-empty" data-empty hidden>No jobs match these filters. <button type="button" class="cat-clear" data-clear>Clear filters</button></p><p class="cat-foot">Always check values against the source each job names. Jobs marked Draft have the procedure but no specs loaded yet.</p></div>`;
   return k.pageHtml({ title, theme, body: `<style>${css}</style>${body}`, script: jobs.length ? script : "", width: 1000 });
 }

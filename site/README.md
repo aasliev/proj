@@ -1,8 +1,8 @@
 # Car fixes
 
-Step-by-step trainers for car repairs. Each repair is a **job**: practise it on screen
+Step-by-step trainers for car repairs. Each repair is a **job**: practice it on screen
 (questions, bolt-order puzzles, torque values), then use Garage mode or the printed
-checklist at the car. The site is a catalogue page plus one self-contained HTML page per job.
+checklist at the car. The site is a catalog page plus one self-contained HTML page per job.
 
 ## Build and open
 
@@ -14,7 +14,7 @@ node site/build.mjs --public   # leaves out jobs marked private
 node site/build.mjs --dark     # dark theme
 ```
 
-Then open `site/dist/index.html` in a browser. The catalogue filters by car, system, difficulty,
+Then open `site/dist/index.html` in a browser. The catalog filters by car, system, difficulty,
 time and whether specs are loaded, plus a text search. The filters are kept in the address
 (for example `index.html#system=Brakes&time=120`), so a filtered view can be bookmarked or shared. Each page in `site/dist/jobs/` also works on
 its own. `site/dist/` is not committed: build it after cloning.
@@ -28,7 +28,7 @@ its own. `site/dist/` is not committed: build it after cloning.
 | `a4-b8-oil-change`: engine oil and filter change (2.0 TFSI), 10 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-brake-fluid`: brake fluid change, up to 10 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-fluid-check`: check and top up oil, coolant, brake and washer fluid, 5 steps | **Draft** | Licensed data, not loaded yet |
-| `a4-b8-wheel-swap`: wheel swap and tyre check, up to 8 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-wheel-swap`: wheel swap and tire check, up to 8 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-air-filter`: engine air filter, 4 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-cabin-filter`: cabin (pollen) filter, 4 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-wipers`: wiper blades, up to 6 steps | **Draft** | Licensed data, not loaded yet |
@@ -39,7 +39,7 @@ its own. `site/dist/` is not committed: build it after cloning.
 | `a4-b8-spark-plugs`: spark plugs and ignition coils (2.0 TFSI), 5 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-aux-belt`: auxiliary belt check and replacement, 5 steps | **Draft** | Licensed data, not loaded yet |
 | `a4-b8-jump-start`: jump start from a car or a jump pack, 6 steps | **Draft** | General practice and the owner's manual |
-| `a4-b8-flat-tyre`: spare wheel or repair kit at the roadside, up to 5 steps | **Draft** | Licensed data, not loaded yet |
+| `a4-b8-flat-tire`: spare wheel or repair kit at the roadside, up to 5 steps | **Draft** | Licensed data, not loaded yet |
 
 A **draft** has the full procedure, but no specs: torques show as "spec not loaded" and
 measurements are recorded without a grade. Nothing in it is a guessed number.
@@ -66,7 +66,7 @@ share drawings and bolt patterns: the wheel swap reuses the brake job's drawing,
 `lib/diagrams.mjs` holds the wheel star pattern.
 
 A spec can also be marked not graded on purpose, with a reason shown in its place:
-`{ pending: true, unit: "bar", why: "from the label inside the fuel filler flap" }`.
+`{ pending: true, unit: "psi", why: "from the label inside the fuel door" }`.
 
 ### Step format
 
@@ -111,7 +111,7 @@ one of `flange`, `cover`, `bracket`, `pan`, `wheel`; or a column of bearing caps
 
 | Path | What it holds |
 |---|---|
-| `build.mjs` | Builds the catalogue and every job page into `dist/` |
+| `build.mjs` | Builds the catalog and every job page into `dist/` |
 | `runtime/game.js`, `runtime/game.css` | The job engine shared by every job |
 | `lib/page.mjs` | Page templates and the build checks |
 | `lib/small-figures.mjs` | Drawings for the small jobs: filter box, wiper, battery, headlamp, ignition coils, belt drive |

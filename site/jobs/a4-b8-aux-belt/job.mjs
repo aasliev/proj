@@ -28,7 +28,7 @@ const STEPS = [
         type: "choice",
         q: "The belt has a few fine cracks across some ribs. Is it still OK?",
         options: [
-          { text: "A few fine cracks are normal ageing; many cracks or missing pieces mean replace it", ok: true, why: "Replace it if cracks are many and close together, pieces are missing, or it's at the interval your source gives." },
+          { text: "A few fine cracks are normal aging; many cracks or missing pieces mean replace it", ok: true, why: "Replace it if cracks are many and close together, pieces are missing, or it's at the interval your source gives." },
           { text: "Any crack means the belt is about to snap", ok: false, why: "Fine cracks appear with age; judge by how many and how deep." },
           { text: "Cracks don't matter as long as it doesn't squeal", ok: false, why: "A belt can fail without warning: look, don't only listen." },
         ],
@@ -53,7 +53,7 @@ const STEPS = [
     focus: ["tensioner", "beltLoop"],
     remove: ["beltLoop"],
     ref: "",
-    say: "Turn the tensioner with a spanner or belt tool in the direction your source shows to take the load off the belt, lock it if it has a locking hole, and slip the belt off one smooth pulley. Let the tensioner back gently: a spring-loaded tensioner that snaps back can be damaged.",
+    say: "Turn the tensioner with a wrench or belt tool in the direction your source shows to take the load off the belt, lock it if it has a locking hole, and slip the belt off one smooth pulley. Let the tensioner back gently: a spring-loaded tensioner that snaps back can be damaged.",
     tasks: [{ type: "check", items: ["Tensioner turned in the right direction and locked with a pin, if it has a locking hole", "Belt off", "Tensioner and idler pulleys spun by hand: smooth and quiet, no wobble"] }],
   },
   {

@@ -9,7 +9,7 @@ export function corner(label = "A front brake corner seen from outboard: the hub
   const F = X([0, 0, 0]);
   const prism = (poly, s0, s1, style) => S(G.prismOf(F, poly, s0, s1, P), style);
 
-  // Hub: flange and centring spigot, five bolt holes.
+  // Hub: flange and centering spigot, five bolt holes.
   f.part("hub", S(G.disc(-24, 10, 72, F, P), { tone: "lo" }) + S(G.disc(10, 22, 30, F, P), { tone: "mid" }) + D(G.dotsOf(F, 10, 52, 5, P, { all: true }), { size: 1.1, tone: "lo" }));
   // Inner pad sits behind the disc: drawn before it.
   const pad = (s0, s1) => prism(sector(108, 150, 64, 116), s0, s0 + 4, { tone: "mid" }) + prism(sector(112, 146, 67, 113), s0 + 4, s1, { tone: "lo" });

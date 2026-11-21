@@ -23,9 +23,9 @@ export function filterBox({ id, label, flat = false }) {
   return f.svg();
 }
 
-// A wiper arm and blade on the windscreen.
+// A wiper arm and blade on the windshield.
 export function wiper() {
-  const f = figure({ id: "wiper", label: "A wiper arm lying on the windscreen with its blade clipped to the end of the arm; the arm's spindle and nut cover at the bottom.", fit: [[-60, -260, 0], [60, 260, 0], [-60, -260, 120], [60, 260, 120]], azimuth: 62, elevation: 38, width: 560, height: 380 });
+  const f = figure({ id: "wiper", label: "A wiper arm lying on the windshield with its blade clipped to the end of the arm; the arm's spindle and nut cover at the bottom.", fit: [[-60, -260, 0], [60, 260, 0], [-60, -260, 120], [60, 260, 120]], azimuth: 62, elevation: 38, width: 560, height: 380 });
   const { P } = f;
   f.part("screen", `<g class="rb-ghost">${S(k.slabOf({ x: -80, y: -270, w: 120, d: 540, r: 6 }, 0, 4, P, 2, 0.5), { tone: "hi" })}</g>`);
   const F = G.frameOf([0, -240, 10], [0, 1, 0], [1, 0, 0], [0, 0, 1]);

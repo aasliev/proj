@@ -10,13 +10,13 @@ export const meta = draftMeta({
   minutes: 20,
   difficulty: "Beginner",
   summary: "Start a car with a flat battery from another car or a jump pack: the right connection order, the jump-start points, and what to do afterwards.",
-  draftNote: "The connection order is general practice. Where the jump-start points are on your car is in the owner's manual: on many cars they are under the bonnet, even when the battery is elsewhere.",
+  draftNote: "The connection order is general practice. Where the jump-start points are on your car is in the owner's manual: on many cars they are under the hood, even when the battery is elsewhere.",
 });
 
 const VARIANTS = {
   donor: {
     q: "What will you start it from?",
-    help: "Another car with a 12 V battery and jump leads, or a portable jump pack.",
+    help: "Another car with a 12 V battery and jumper cables, or a portable jump pack.",
     options: [
       { id: "car", label: "Another car" },
       { id: "pack", label: "Jump pack" },
@@ -52,26 +52,26 @@ const STEPS = [
   {
     id: "red",
     group: "jump",
-    title: "Red lead: positive to positive",
+    title: "Red cable: positive to positive",
     figure: "battery",
     focus: ["posClamp"],
     ref: "",
-    say: "Connect the red lead to the dead car's positive (+) jump point first, then the other end to the donor's positive (+). Keep the free clamps apart and away from metal.",
+    say: "Connect the red cable to the dead car's positive (+) jump point first, then the other end to the donor's positive (+). Keep the free clamps apart and away from metal.",
     tasks: [{ type: "check", items: ["Red to the dead car's +", "Red to the donor's + (or the pack's red clamp is the one fitted)"] }],
   },
   {
     id: "black",
     group: "jump",
-    title: "Black lead: donor negative, then an earth point",
+    title: "Black cable: donor negative, then a ground point",
     figure: "battery",
     focus: ["negClamp"],
     ref: "",
-    say: "Connect the black lead to the donor's negative (−), then the last clamp to the dead car's earth point: a bare metal point on the engine or body that the owner's manual shows, away from the battery. Any spark from the last connection then happens away from battery gases.",
+    say: "Connect the black cable to the donor's negative (−), then the last clamp to the dead car's ground point: a bare metal point on the engine or body that the owner's manual shows, away from the battery. Any spark from the last connection then happens away from battery gases.",
     tasks: [
-      { type: "check", items: ["Black to the donor's −", "Last clamp to the dead car's earth point, not to the battery's − post"] },
+      { type: "check", items: ["Black to the donor's −", "Last clamp to the dead car's ground point, not to the battery's − post"] },
       {
         type: "choice",
-        q: "Why does the last clamp go on an earth point away from the battery?",
+        q: "Why does the last clamp go on a ground point away from the battery?",
         options: [
           { text: "The last connection can spark, and a battery can give off explosive hydrogen", ok: true, why: "Making the final connection away from the battery keeps the spark away from the gas." },
           { text: "It gives a stronger current", ok: false, why: "The current is the same; it's about where the spark happens." },
@@ -101,8 +101,8 @@ const STEPS = [
     figure: "battery",
     focus: ["negClamp", "posClamp"],
     ref: "",
-    say: "Leave the jumped car running. Remove the clamps in the reverse order: earth point, donor −, donor +, jumped car +. Don't let the clamps touch each other or the car.",
-    tasks: [{ type: "check", items: ["Earth point clamp off first", "Donor − off", "Donor + off", "Jumped car + off last; jump point covers closed"] }],
+    say: "Leave the jumped car running. Remove the clamps in the reverse order: ground point, donor −, donor +, jumped car +. Don't let the clamps touch each other or the car.",
+    tasks: [{ type: "check", items: ["Ground point clamp off first", "Donor − off", "Donor + off", "Jumped car + off last; jump point covers closed"] }],
   },
   {
     id: "after",

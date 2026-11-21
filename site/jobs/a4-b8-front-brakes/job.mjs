@@ -98,7 +98,7 @@ const STEPS = [
     remove: ["bolts", "wheel"],
     ref: "",
     when: { caliper: "floating" },
-    say: "Remove the wheel bolts and the wheel. If the wheel sticks to the hub, push the tyre sideways by hand: never hit the wheel or the disc with a hammer.",
+    say: "Remove the wheel bolts and the wheel. If the wheel sticks to the hub, push the tire sideways by hand: never hit the wheel or the disc with a hammer.",
     tasks: [{ type: "check", items: ["Wheel bolts out and kept clean", "Wheel off, laid flat away from the work area", "Locking wheel bolt adapter kept with the car, if fitted"] }],
   },
   {
@@ -168,7 +168,7 @@ const STEPS = [
     remove: ["disc"],
     ref: "",
     when: { caliper: "floating" },
-    say: "Remove the small retaining screw and pull the disc off the hub. If it is rusted on, soak the centre with penetrating oil and tap the hat (not the friction ring) with a soft mallet.",
+    say: "Remove the small retaining screw and pull the disc off the hub. If it is rusted on, soak the center with penetrating oil and tap the hat (not the friction ring) with a soft mallet.",
     tasks: [{ type: "check", items: ["Retaining screw out (new one ready)", "Disc off the hub"] }],
   },
   {
@@ -292,7 +292,7 @@ const STEPS = [
     when: { caliper: "floating" },
     say: "Before the wheel goes on, pump the brake pedal until it is firm: the first presses only move the piston up to the new pads. Fit the wheel, screw the bolts in by hand, lower the car and tighten in a star pattern so the wheel pulls on evenly.",
     tasks: [
-      { type: "check", items: ["Brake pedal pumped until firm", "Hub spigot and wheel centre clean; no grease on the wheel bolt threads or seats unless your source says so", "Bolts screwed in by hand, car lowered to the ground"] },
+      { type: "check", items: ["Brake pedal pumped until firm", "Hub spigot and wheel center clean; no grease on the wheel bolt threads or seats unless your source says so", "Bolts screwed in by hand, car lowered to the ground"] },
       { type: "order", diagram: "wheel", q: "Tighten the wheel bolts in a star pattern: click them in order, starting with the top bolt." },
       { type: "torque", what: "Wheel bolts", tool: "torque wrench, not an impact gun", stages: [pending("All five, in the star pattern")] },
     ],

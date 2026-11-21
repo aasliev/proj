@@ -45,7 +45,7 @@ export const VARIANTS = {
     q: "Transmission-side sealing flange",
     help: "Count the bolt holes used by the rear crank seal flange and check the bolt material (p. 31).",
     options: [
-      { id: "6al", label: "6 bolts, aluminium" },
+      { id: "6al", label: "6 bolts, aluminum" },
       { id: "6st", label: "6 bolts, steel" },
       { id: "8", label: "8 bolts" },
     ],
@@ -106,8 +106,8 @@ export const STEPS = [
           "Transmission-side sealing flange with seal (replace after removing) · 13 · p. 30",
           "8 piston pin circlips (replace after removing) · 13 · p. 52",
           "Sensor wheel and its bolts, only if you remove the wheel from the crank · 13 · p. 38",
-          "Bearing shells: replace worn ones; colours come from the letters on the block and crank · 13 · p. 37–40",
-          "Sealant for the sealing flange, from the parts catalogue; check its expiry date · 13 · p. 33",
+          "Bearing shells: replace worn ones; colors come from the letters on the block and crank · 13 · p. 37–40",
+          "Sealant for the sealing flange, from the parts catalog; check its expiry date · 13 · p. 33",
           "Plastigauge, for the bearing clearance checks · 13 · p. 41, 59",
         ],
       },
@@ -361,7 +361,7 @@ export const STEPS = [
     focus: ["shellUp"],
     install: ["shellUp"],
     ref: "13 · p. 37, 39–40",
-    say: "Shell thickness is graded by colour. The letters on the block (on the oil pan face or the transmission end) give the colour of each upper shell, one letter per bearing starting at bearing 1.",
+    say: "Shell thickness is graded by color. The letters on the block (on the oil pan face or the transmission end) give the color of each upper shell, one letter per bearing starting at bearing 1.",
     tasks: [
       {
         type: "choice",
@@ -373,9 +373,9 @@ export const STEPS = [
       },
       {
         type: "choice",
-        q: "The block is stamped \"R\" for bearing 2. Which colour shell goes there?",
+        q: "The block is stamped \"R\" for bearing 2. Which color shell goes there?",
         options: [
-          { text: "Red", ok: true, why: "Block letters: G yellow, R red, S black, VI purple, WS white. Confirm the allocation in the parts catalogue." },
+          { text: "Red", ok: true, why: "Block letters: G yellow, R red, S black, VI purple, WS white. Confirm the allocation in the parts catalog." },
           { text: "Black", ok: false, why: "Black is S on the block." },
           { text: "Yellow", ok: false, why: "Yellow is G on the block." },
         ],
@@ -433,13 +433,13 @@ export const STEPS = [
     focus: ["crank", "shellLow"],
     install: ["crank", "shellLow"],
     ref: "13 · p. 37–40",
-    say: "Lay the crank in the oiled upper shells. The letters on the crankshaft give the colour of each lower (cap) shell, one letter per bearing.",
+    say: "Lay the crank in the oiled upper shells. The letters on the crankshaft give the color of each lower (cap) shell, one letter per bearing.",
     tasks: [
       {
         type: "choice",
         q: "The crank is stamped \"B\" for bearing 4. Which cap shell?",
         options: [
-          { text: "Blue", ok: true, why: "Crank letters: R red, G yellow, B blue, W white, V purple, S black. Confirm in the parts catalogue." },
+          { text: "Blue", ok: true, why: "Crank letters: R red, G yellow, B blue, W white, V purple, S black. Confirm in the parts catalog." },
           { text: "Black", ok: false, why: "Black is S." },
         ],
       },
@@ -452,7 +452,7 @@ export const STEPS = [
     title: "Check main bearing clearance with Plastigauge",
     figure: "plastigauge",
     ref: "13 · p. 41",
-    say: "Measure with the old bolts, then fit new bolts for final assembly. Lay the Plastigauge across the full bearing width, centred on the shell, fit the cap with the full tightening sequence, and do not turn the crank. Remove the cap and read the squashed strip against the scale.",
+    say: "Measure with the old bolts, then fit new bolts for final assembly. Lay the Plastigauge across the full bearing width, centered on the shell, fit the cap with the full tightening sequence, and do not turn the crank. Remove the cap and read the squashed strip against the scale.",
     tasks: [
       {
         type: "choice",
@@ -543,7 +543,7 @@ export const STEPS = [
           { text: "Pry it apart with a screwdriver", ok: false, why: "That damages the cracked faces, which must mate perfectly." },
         ],
       },
-      { type: "check", items: ["Each rod and cap colour-marked with its cylinder", "Rods replaced as a complete set if any is replaced"] },
+      { type: "check", items: ["Each rod and cap color-marked with its cylinder", "Rods replaced as a complete set if any is replaced"] },
     ],
   },
   {
@@ -632,7 +632,7 @@ export const STEPS = [
     install: ["rodShells"],
     ref: "13 · p. 51, 54",
     say: "Place each shell centrally in the rod and in the cap, with the same distance (dimension a = a) at both ends.",
-    tasks: [{ type: "check", items: ["Shells centred in rod and cap (a = a)", "Worn shells replaced", "Shell contact faces coated with engine oil"] }],
+    tasks: [{ type: "check", items: ["Shells centered in rod and cap (a = a)", "Worn shells replaced", "Shell contact faces coated with engine oil"] }],
   },
   {
     id: "rod-plastigauge",
@@ -665,7 +665,7 @@ export const STEPS = [
     ref: "13 · p. 51",
     say: "Each cap goes on its own rod, marks toward the belt pulley end. New bolts, with oil on the threads and under the heads: this is one of the places the manual asks for lubricated bolts.",
     tasks: [
-      { type: "check", items: ["Cap matches its rod's colour mark", "Marks face the belt pulley end", "New bolts, threads and contact faces oiled"] },
+      { type: "check", items: ["Cap matches its rod's color mark", "Marks face the belt pulley end", "New bolts, threads and contact faces oiled"] },
       { type: "torque", what: "Connecting rod bolts, M8 (new, oiled)", when: { rodBolt: "M8" }, stages: [{ bolts: "Both bolts", nm: 30 }, { bolts: "Both bolts", deg: 90 }] },
       { type: "torque", what: "Connecting rod bolts, M9 (new, oiled)", when: { rodBolt: "M9" }, stages: [{ bolts: "Both bolts", nm: 45 }, { bolts: "Both bolts", deg: 90 }] },
     ],
@@ -742,7 +742,7 @@ export const STEPS = [
     tasks: [
       { type: "order", diagram: "flange6", when: { flange: ["6al", "6st"] }, q: "Click the six bolts in tightening order." },
       { type: "order", diagram: "flange8", when: { flange: "8" }, q: "Click the eight bolts in tightening order." },
-      { type: "torque", what: "Sealing flange bolts, aluminium (new)", when: { flange: "6al" }, stages: [{ bolts: "Bolts 1–6: screw in by hand all the way", check: true }, { bolts: "Bolts 1–6", nm: 4 }, { bolts: "Bolts 1–6", deg: 45 }] },
+      { type: "torque", what: "Sealing flange bolts, aluminum (new)", when: { flange: "6al" }, stages: [{ bolts: "Bolts 1–6: screw in by hand all the way", check: true }, { bolts: "Bolts 1–6", nm: 4 }, { bolts: "Bolts 1–6", deg: 45 }] },
       { type: "torque", what: "Sealing flange bolts, steel", when: { flange: "6st" }, stages: [{ bolts: "Bolts 1–6: screw in by hand all the way", check: true }, { bolts: "Bolts 1–6", nm: 9 }] },
       { type: "torque", what: "Sealing flange bolts", when: { flange: "8" }, stages: [{ bolts: "Bolts 1–8: screw in by hand all the way", check: true }, { bolts: "Bolts 1–8", nm: 9 }] },
       {

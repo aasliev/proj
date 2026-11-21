@@ -30,7 +30,7 @@ const STEPS = [
     figure: "bay",
     focus: ["engine"],
     ref: "",
-    say: "Park on level ground with the engine off. Find each filler by the symbol on its cap: an oil can for engine oil, a thermometer in liquid for coolant, a circle in brackets for brake fluid, a windscreen with a spray for washer fluid.",
+    say: "Park on level ground with the engine off. Find each filler by the symbol on its cap: an oil can for engine oil, a thermometer in liquid for coolant, a circle in brackets for brake fluid, a windshield with a spray for washer fluid.",
     tasks: [
       { type: "check", items: ["Car on level ground, engine off, parking brake on", "Each cap found by its symbol"] },
       {
@@ -56,7 +56,7 @@ const STEPS = [
       { type: "check", items: ["Level read: in the marked range", "If low: topped up in small amounts with oil meeting the standard for your engine (spec not loaded), rechecked after each top-up", "Filler cap and dipstick secure"] },
       {
         type: "choice",
-        q: "You top up a litre between every service. What should you do?",
+        q: "You top up a liter between every service. What should you do?",
         options: [
           { text: "Nothing: all engines use that much", ok: false, why: "Some oil use is normal, but if you're adding a lot regularly, check what your source allows, and have it looked at if it's more." },
           { text: "Note how much and how often, and compare with the consumption your source allows", ok: true, why: "Keep a record. High oil use can point to worn piston rings, valve stem seals or the crankcase breather." },
@@ -86,7 +86,7 @@ const STEPS = [
     ref: "",
     say: "The level should be between MIN and MAX. As pads wear, the pistons move out and the level drops a little: that is normal. A sudden drop, or a level below MIN, can mean a leak; have the brakes checked before driving.",
     tasks: [
-      { type: "check", items: ["Level between MIN and MAX", "Fluid colour noted: fresh fluid is light amber, old fluid is dark", "If topping up: only fluid of the type printed on the cap or given in your source (spec not loaded), from a sealed bottle"] },
+      { type: "check", items: ["Level between MIN and MAX", "Fluid color noted: fresh fluid is light amber, old fluid is dark", "If topping up: only fluid of the type printed on the cap or given in your source (spec not loaded), from a sealed bottle"] },
       {
         type: "choice",
         q: "The brake fluid is a little below MAX and the pads are half worn. What do you do?",
@@ -106,8 +106,8 @@ const STEPS = [
     focus: ["washerCap"],
     remove: ["washerCap"],
     ref: "",
-    say: "Fill with screenwash mixed as the bottle says. In winter use a mix rated for the coldest temperature you expect: plain water freezes and can crack the tank and pump. Never use washing-up liquid: it smears and can damage the paint and the wiper rubbers.",
-    tasks: [{ type: "check", items: ["Tank filled with screenwash at the right strength for the season", "Cap back on", "Washers tested: both jets hit the screen (and the headlamp washers work, if fitted)"] }],
+    say: "Fill with washer fluid mixed as the bottle says. In winter use a mix rated for the coldest temperature you expect: plain water freezes and can crack the tank and pump. Never use dish soap: it smears and can damage the paint and the wiper rubbers.",
+    tasks: [{ type: "check", items: ["Tank filled with washer fluid at the right strength for the season", "Cap back on", "Washers tested: both jets hit the screen (and the headlamp washers work, if fitted)"] }],
   },
 ];
 

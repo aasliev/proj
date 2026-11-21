@@ -42,7 +42,7 @@ const STEPS = [
     focus: ["element"],
     remove: ["element"],
     ref: "",
-    say: "Lift out the old element, noting which way up it sat. Clean leaves and dust out of the housing, wiping towards you so nothing drops into the clean-air side leading to the engine.",
+    say: "Lift out the old element, noting which way up it sat. Clean leaves and dust out of the housing, wiping toward you so nothing drops into the clean-air side leading to the engine.",
     tasks: [
       { type: "check", items: ["Old element out, noted which way up", "Housing cleaned; nothing dropped into the clean side"] },
       {

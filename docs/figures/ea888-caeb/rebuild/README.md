@@ -20,7 +20,7 @@ Opening the file on github.com only shows its source code; clone or download it 
 - **Practice** mode quizzes you: answer the questions, click bolts in tightening
   order, type in torque and angle values. The next step unlocks when the current
   one is done.
-- **Garage** mode shows every spec plainly, as a checklist to tick off at the bench.
+- **Garage** mode shows every spec plainly, as a checklist to check off at the bench.
 - Step 1 asks which versions of some parts your engine has (rod bolt size, oil ring
   type, flange and cover bolt counts, head bolt type and so on), and whether the
   balance shafts came out of the block. Check your parts: the torques depend on

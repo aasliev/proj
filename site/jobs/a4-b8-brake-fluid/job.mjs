@@ -28,8 +28,8 @@ const VARIANTS = {
       { id: "pedal", label: "Helper on the pedal" },
     ],
   },
-  gearbox: {
-    q: "Gearbox",
+  transmission: {
+    q: "Transmission",
     help: "On manual cars the clutch shares the brake fluid reservoir, so the clutch is bled too.",
     options: [
       { id: "manual", label: "Manual (clutch pedal)" },
@@ -57,8 +57,8 @@ const STEPS = [
     ref: "",
     say: "Brake fluid absorbs water from the air over time. Water lowers its boiling point, so under hard braking it can boil and the pedal goes soft. That's why it is changed by time, not mileage.",
     tasks: [
-      { type: "variant", keys: ["method", "gearbox"] },
-      { type: "check", items: ["New fluid of the type your source gives (spec not loaded), in sealed bottles, enough to flush the whole system (spec not loaded)", "Ring spanner for the bleed screws, clear tube that fits them snugly, catch bottle", "Syringe or clean baster for the reservoir", "Rags and water to wash off any spills: brake fluid strips paint", "Eye protection and gloves"] },
+      { type: "variant", keys: ["method", "transmission"] },
+      { type: "check", items: ["New fluid of the type your source gives (spec not loaded), in sealed bottles, enough to flush the whole system (spec not loaded)", "Box-end wrench for the bleed screws, clear tube that fits them snugly, catch bottle", "Syringe or clean baster for the reservoir", "Rags and water to wash off any spills: brake fluid strips paint", "Eye protection and gloves"] },
       {
         type: "choice",
         q: "An opened bottle of brake fluid from last year is in the garage. Can you use it?",
@@ -133,7 +133,7 @@ const STEPS = [
     figure: "bay",
     focus: ["brakeReservoir"],
     ref: "",
-    when: { gearbox: "manual" },
+    when: { transmission: "manual" },
     say: "The clutch slave cylinder takes its fluid from the same reservoir. Bleed it at its bleed screw the way your source describes, until the fluid is clean, and pump the clutch pedal afterwards to check it returns properly.",
     tasks: [{ type: "check", items: ["Clutch slave cylinder bled until the fluid ran clean", "Clutch pedal returns fully and feels normal"] }],
   },

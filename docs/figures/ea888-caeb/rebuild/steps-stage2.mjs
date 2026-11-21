@@ -73,7 +73,7 @@ export const BEFORE_REAR = [
           "Lower oil pan bolts and drain plug (replace after removing) · 17 · p. 153",
           "O-rings for the oil pump and suction line, seal for the oil level sensor · 17 · p. 152",
           "Coolant pump seals and O-rings; coolant pump drive wheel bolt (replace) · 19 · p. 178–179",
-          "Sealant for the chain tensioner, lower timing cover and both oil pans, from the parts catalogue, in date · 15 · p. 70, 17 · p. 155, 159",
+          "Sealant for the chain tensioner, lower timing cover and both oil pans, from the parts catalog, in date · 15 · p. 70, 17 · p. 155, 159",
         ],
       },
     ],
@@ -134,7 +134,7 @@ export const BEFORE_REAR = [
         type: "choice",
         q: "What goes on the tensioner's seal?",
         options: [
-          { text: "Sealant from the parts catalogue", ok: true, why: "The manual says to coat this seal with sealant." },
+          { text: "Sealant from the parts catalog", ok: true, why: "The manual says to coat this seal with sealant." },
           { text: "Engine oil", ok: false, why: "This one gets sealant, not oil." },
         ],
       },
@@ -502,7 +502,7 @@ export const AFTER_REAR = [
     ref: "19 · p. 178–181",
     say: "The pump's connection piece plugs into the engine oil cooler, which sits on the sub-assembly bracket. If that bracket isn't on yet, fit the pump when it is.",
     tasks: [
-      { type: "check", items: ["New seals and O-rings; O-rings coated with coolant (type per the parts catalogue)", "Both centering pins in the block", "Connection piece into the oil cooler; pump pushed onto it and onto the centering pins", "Protective cap removed if the pump is new"] },
+      { type: "check", items: ["New seals and O-rings; O-rings coated with coolant (type per the parts catalog)", "Both centering pins in the block", "Connection piece into the oil cooler; pump pushed onto it and onto the centering pins", "Protective cap removed if the pump is new"] },
       { type: "torque", what: "Coolant pump bolts, in sequence 1–5 shown in the manual", stages: [{ bolts: "Bolts 1–5", nm: 9 }] },
     ],
   },

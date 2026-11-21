@@ -14,7 +14,7 @@ export const meta = draftMeta({
 const VARIANTS = {
   type: {
     q: "Filter type",
-    help: "A plain filter is white paper; an activated carbon filter is grey or black and also takes out smells and exhaust fumes. Either fits if it is the right part for the car.",
+    help: "A plain filter is white paper; an activated carbon filter is gray or black and also takes out smells and exhaust fumes. Either fits if it is the right part for the car.",
     options: [
       { id: "plain", label: "Plain (pollen)" },
       { id: "carbon", label: "Activated carbon" },
@@ -31,8 +31,8 @@ const STEPS = [
     figure: "cabin",
     focus: ["lid"],
     ref: "",
-    say: "The filter sits in the air intake for the heater and air conditioning. Where depends on the car: commonly in the passenger footwell behind a cover, behind the glovebox, or under the panel below the windscreen. Your source or the owner's manual shows where it is on yours.",
-    tasks: [{ type: "variant", keys: ["type"] }, { type: "check", items: ["Location and access panel found in your source (spec not loaded)", "New filter for this car", "Torch, and screwdriver or Torx bits for the cover"] }],
+    say: "The filter sits in the air intake for the heater and air conditioning. Where depends on the car: commonly in the passenger footwell behind a cover, behind the glovebox, or under the panel below the windshield. Your source or the owner's manual shows where it is on yours.",
+    tasks: [{ type: "variant", keys: ["type"] }, { type: "check", items: ["Location and access panel found in your source (spec not loaded)", "New filter for this car", "Flashlight, and screwdriver or Torx bits for the cover"] }],
   },
   {
     id: "open",
@@ -62,7 +62,7 @@ const STEPS = [
         options: [
           { text: "Whichever way it fits", ok: false, why: "Many filters fit both ways, but only one way works as designed." },
           { text: "In the direction the air flows, as on the old filter or the housing", ok: true, why: "The arrow shows airflow. Facing it the wrong way reduces filtering, and for a carbon filter it reduces smell removal." },
-          { text: "Always towards the windscreen", ok: false, why: "It depends on how the housing is built: follow the air, not the windscreen." },
+          { text: "Always toward the windshield", ok: false, why: "It depends on how the housing is built: follow the air, not the windshield." },
         ],
       },
     ],
